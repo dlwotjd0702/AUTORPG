@@ -1,20 +1,81 @@
 using UnityEngine;
+using System.Collections.Generic;
+using System.IO;
+using CsvHelper;
+using CsvHelper.Configuration;
+using System.Globalization;
+using System.Linq;
 
 namespace Inventory
 {
+  
+    [System.Serializable]
     public class InventorySystem : MonoBehaviour
     {
         public int slotCount = 100;
         public InventorySlot[] slots;
 
+        // TSV 데이터
+        public List<EquipmentData> dataList = new List<EquipmentData>();
+        public Dictionary<string, EquipmentData> dataDict = new Dictionary<string, EquipmentData>();
+
+        // 아이콘 테이블 (SO)
+        public EquipmentIconTableSO iconTableSO;
+
         private void Awake()
         {
+            // 슬롯 초기화
             slots = new InventorySlot[slotCount];
             for (int i = 0; i < slotCount; i++)
                 slots[i] = new InventorySlot();
+
+            // TSV 파싱 (CsvHelper 사용)
+            string path = Path.Combine(Application.streamingAssetsPath, "equipment.tsv");
+            dataList = LoadFromTSVWithCsvHelper(path);
+
+            dataDict.Clear();
+            foreach (var data in dataList)
+                dataDict[data.id] = data;
         }
 
-        // --------- 장비/스킬 획득 ---------
+        public List<EquipmentData> LoadFromTSVWithCsvHelper(string path)
+        {
+            var list = new List<EquipmentData>();
+            if (!File.Exists(path))
+            {
+                Debug.LogError("TSV 파일이 존재하지 않습니다: " + path);
+                return list;
+            }
+
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                Delimiter = "\t",
+                HasHeaderRecord = true,
+                MissingFieldFound = null,
+                IgnoreBlankLines = true,
+                TrimOptions = TrimOptions.Trim,
+                ShouldSkipRecord = args => args.Row.Parser.Record.All(string.IsNullOrWhiteSpace)
+            };
+
+            using (var reader = new StreamReader(path))
+            using (var csv = new CsvReader(reader, config))
+            {
+                list = new List<EquipmentData>(csv.GetRecords<EquipmentData>());
+            }
+            return list;
+        }
+
+
+        public EquipmentData GetEquipmentData(string id)
+        {
+            dataDict.TryGetValue(id, out var data);
+            return data;
+        }
+        public Sprite GetIcon(string id)
+        {
+            return iconTableSO ? iconTableSO.GetSprite(id) : null;
+        }
+
         public bool AddItem(EquipmentData item, int amount = 1)
         {
             for (int i = 0; i < slots.Length; i++)
@@ -26,7 +87,6 @@ namespace Inventory
                     return true;
                 }
             }
-            // 빈칸에 신규
             for (int i = 0; i < slots.Length; i++)
             {
                 if (slots[i].IsEmpty)
@@ -40,14 +100,22 @@ namespace Inventory
             return false; // 인벤토리 풀
         }
 
-        // --------- 장비 장착(종류별 1개만) ---------
+        public bool AddItemById(string id, int amount = 1)
+        {
+            var data = GetEquipmentData(id);
+            if (data == null)
+            {
+                Debug.LogError("[Inventory] 알 수 없는 아이템 id: " + id);
+                return false;
+            }
+            return AddItem(data, amount);
+        }
+
         public bool Equip(string itemId)
         {
             var target = GetSlotById(itemId);
             if (target == null || !target.isOwned)
                 return false;
-
-            // 종류별 1개만 장착
             if (target.itemData.type == ItemType.Weapon ||
                 target.itemData.type == ItemType.Armor ||
                 target.itemData.type == ItemType.Accessory)
@@ -72,7 +140,7 @@ namespace Inventory
             return false;
         }
 
-        // ============= [1] 무기: 공격력, 공격속도 =============
+        // 무기: 공격력, 공격속도
         public (float atkMul, float atkSpdMul) GetWeaponMultipliers()
         {
             float atk = 0f, atkSpd = 0f;
@@ -82,19 +150,19 @@ namespace Inventory
                     continue;
                 if (slot.isOwned)
                 {
-                    atk += slot.itemData.ownedAtkPercent;
-                    atkSpd += slot.itemData.ownedAtkSpdPercent;
+                    atk += slot.itemData.OwnedAtkPercent;
+                    atkSpd += slot.itemData.OwnedAtkSpdPercent;
                 }
                 if (slot.isEquipped)
                 {
-                    atk += slot.itemData.equipAtkPercent;
-                    atkSpd += slot.itemData.equipAtkSpdPercent;
+                    atk += slot.itemData.EquipAtkPercent;
+                    atkSpd += slot.itemData.EquipAtkSpdPercent;
                 }
             }
             return (1f + atk, 1f + atkSpd);
         }
 
-        // ============= [2] 방어구: 방어력, 체력 =============
+        // 방어구: 방어력, 체력
         public (float defMul, float hpMul) GetArmorMultipliers()
         {
             float def = 0f, hp = 0f;
@@ -104,19 +172,19 @@ namespace Inventory
                     continue;
                 if (slot.isOwned)
                 {
-                    def += slot.itemData.ownedDefPercent;
-                    hp  += slot.itemData.ownedHpPercent;
+                    def += slot.itemData.OwnedDefPercent;
+                    hp += slot.itemData.OwnedHpPercent;
                 }
                 if (slot.isEquipped)
                 {
-                    def += slot.itemData.equipDefPercent;
-                    hp  += slot.itemData.equipHpPercent;
+                    def += slot.itemData.EquipDefPercent;
+                    hp += slot.itemData.EquipHpPercent;
                 }
             }
             return (1f + def, 1f + hp);
         }
 
-        // ============= [3] 악세: 크리확률, 크리뎀 =============
+        // 악세: 크리확률, 크리뎀
         public (float critRateMul, float critDmgMul) GetAccessoryMultipliers()
         {
             float critRate = 0f, critDmg = 0f;
@@ -126,25 +194,24 @@ namespace Inventory
                     continue;
                 if (slot.isOwned)
                 {
-                    critRate += slot.itemData.ownedCritRatePercent;
-                    critDmg  += slot.itemData.ownedCritDmgPercent;
+                    critRate += slot.itemData.OwnedCritRatePercent;
+                    critDmg += slot.itemData.OwnedCritDmgPercent;
                 }
                 if (slot.isEquipped)
                 {
-                    critRate += slot.itemData.equipCritRatePercent;
-                    critDmg  += slot.itemData.equipCritDmgPercent;
+                    critRate += slot.itemData.EquipCritRatePercent;
+                    critDmg += slot.itemData.EquipCritDmgPercent;
                 }
             }
             return (1f + critRate, 1f + critDmg);
         }
 
-        // --------- 스킬 효과 집계(더하기) ---------
         public float GetOwnedSkillValue()
         {
             float val = 0f;
             foreach (var slot in slots)
                 if (slot.isOwned && slot.itemData.type == ItemType.Skill)
-                    val += slot.itemData.skillOwnedValue;
+                    val += slot.itemData.SkillOwnedValue;
             return val;
         }
         public float GetEquippedSkillValue()
@@ -152,11 +219,10 @@ namespace Inventory
             float val = 0f;
             foreach (var slot in slots)
                 if (slot.isEquipped && slot.itemData.type == ItemType.Skill)
-                    val += slot.itemData.skillEquipValue;
+                    val += slot.itemData.SkillEquipValue;
             return val;
         }
 
-        // --------- 기타 ---------
         public InventorySlot GetSlotById(string id)
         {
             foreach (var slot in slots)
@@ -165,7 +231,6 @@ namespace Inventory
             return null;
         }
 
-        // --------- 합성 ---------
         public bool TryCombine(string itemId, int requireCount = 2)
         {
             int totalCount = 0;
@@ -184,7 +249,6 @@ namespace Inventory
             EquipmentData newItem = baseData.Clone();
             newItem.grade += 1;
             newItem.name = baseData.name + " +" + newItem.grade;
-            // 실제 퍼센트값은 외부 데이터베이스에서 참조하는 게 더 확장성 좋음
 
             RemoveItem(itemId, requireCount);
             AddItem(newItem, 1);
@@ -192,7 +256,6 @@ namespace Inventory
             return true;
         }
 
-        // --------- 아이템 제거 ---------
         public bool RemoveItem(string id, int amount = 1)
         {
             for (int i = 0; i < slots.Length; i++)

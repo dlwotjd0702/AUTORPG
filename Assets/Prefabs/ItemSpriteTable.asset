@@ -1,0 +1,175 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec8a63ec8ba1429da847bc434a2634a3, type: 3}
+  m_Name: ItemSpriteTable
+  m_EditorClassIdentifier: 
+  icons:
+  - id: armor_01
+    sprite: {fileID: 315356019, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_02
+    sprite: {fileID: -1276260834, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_03
+    sprite: {fileID: -329997444, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_04
+    sprite: {fileID: -1775563209, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_05
+    sprite: {fileID: -1702040728, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_06
+    sprite: {fileID: -544350808, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_07
+    sprite: {fileID: 463760664, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_08
+    sprite: {fileID: 1162597424, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_09
+    sprite: {fileID: 594046392, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_10
+    sprite: {fileID: -1580374990, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_11
+    sprite: {fileID: -1652349943, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_12
+    sprite: {fileID: 1942599937, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_13
+    sprite: {fileID: -1585726964, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_14
+    sprite: {fileID: -15685482, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_15
+    sprite: {fileID: -1182579234, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_16
+    sprite: {fileID: 1176817081, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_17
+    sprite: {fileID: 1943278407, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_18
+    sprite: {fileID: -2035408843, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_19
+    sprite: {fileID: -2106880404, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: armor_20
+    sprite: {fileID: -265193187, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
+  - id: weapon_01
+    sprite: {fileID: -1386649126, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_02
+    sprite: {fileID: -1066563636, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_03
+    sprite: {fileID: 1202577341, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_04
+    sprite: {fileID: 949784339, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_05
+    sprite: {fileID: 1608081369, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_06
+    sprite: {fileID: -1146597593, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_07
+    sprite: {fileID: -1659220557, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_08
+    sprite: {fileID: 729895389, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_09
+    sprite: {fileID: -798059706, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_10
+    sprite: {fileID: -1090581913, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_11
+    sprite: {fileID: -1333716801, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_12
+    sprite: {fileID: 748942695, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_13
+    sprite: {fileID: -1740514050, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_14
+    sprite: {fileID: 892963397, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_15
+    sprite: {fileID: 98217048, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_16
+    sprite: {fileID: -472263681, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_17
+    sprite: {fileID: 1491948207, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_18
+    sprite: {fileID: 1035153294, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_19
+    sprite: {fileID: -505618481, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: weapon_20
+    sprite: {fileID: 388675134, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+  - id: ring_01
+    sprite: {fileID: -881127647, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_02
+    sprite: {fileID: -2092787215, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_03
+    sprite: {fileID: -1351973816, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_04
+    sprite: {fileID: 15451513, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_05
+    sprite: {fileID: -1441747886, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_06
+    sprite: {fileID: -1116246841, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_07
+    sprite: {fileID: 239356318, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_08
+    sprite: {fileID: -661955564, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_09
+    sprite: {fileID: -1761760810, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_10
+    sprite: {fileID: 1248404361, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_11
+    sprite: {fileID: -49300753, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_12
+    sprite: {fileID: 1287633616, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_13
+    sprite: {fileID: -404696554, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_14
+    sprite: {fileID: 1655073322, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_15
+    sprite: {fileID: -775999169, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_16
+    sprite: {fileID: -182720792, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_17
+    sprite: {fileID: 2047254349, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_18
+    sprite: {fileID: 427636222, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_19
+    sprite: {fileID: -1421794597, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: ring_20
+    sprite: {fileID: 1486418690, guid: ba23d4668ca5497408959f553dbec108, type: 3}
+  - id: skill_01
+    sprite: {fileID: 892601925, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_02
+    sprite: {fileID: 1182127211, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_03
+    sprite: {fileID: 1368748990, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_04
+    sprite: {fileID: -1293110434, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_05
+    sprite: {fileID: 1903682810, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_06
+    sprite: {fileID: 346663570, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_07
+    sprite: {fileID: 779476982, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_08
+    sprite: {fileID: 612230806, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_09
+    sprite: {fileID: 541408695, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_10
+    sprite: {fileID: 1886127439, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_11
+    sprite: {fileID: -1111072588, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_12
+    sprite: {fileID: 150386784, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_13
+    sprite: {fileID: -929743325, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_14
+    sprite: {fileID: 1903290576, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_15
+    sprite: {fileID: -387908875, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_16
+    sprite: {fileID: -1011096794, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_17
+    sprite: {fileID: -762028737, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_18
+    sprite: {fileID: -77440690, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_19
+    sprite: {fileID: -1066667857, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
+  - id: skill_20
+    sprite: {fileID: 1721915845, guid: b8c1f4b143e6bc649b522aa12e6c7a85, type: 3}
