@@ -7,13 +7,13 @@ namespace Inventory
     public class SkillDetailPanel : MonoBehaviour
     {
         public Image iconImage;
-        public TMP_Text nameText;
-        public TMP_Text levelText;
-        public TMP_Text descText;
-        public TMP_Text costText;
+        public TextMeshProUGUI nameText;
+        public TextMeshProUGUI levelText;
+        public TextMeshProUGUI descText;
+        public TextMeshProUGUI costText;
         public Button enhanceBtn;
         public Button combineBtn;
-        public Button[] equipButtons; // 4개(Inspector에 연결)
+        public Button[] equipButtons; // 4개
 
         private InventorySystem inventory;
         private string currentSkillId;
@@ -52,23 +52,18 @@ namespace Inventory
 
         void OnEnhance()
         {
-            // 강화 로직 구현 (강화시 skillData.grade++)
             inventory.EnhanceSkill(currentSkillId);
             ShowDetail(currentSkillId);
         }
-
         void OnCombine()
         {
-            // 합성 로직 구현
             inventory.CombineSkill(currentSkillId);
             ShowDetail(currentSkillId);
         }
-
         void OnEquip(int slotIdx)
         {
             inventory.EquipSkill(slotIdx, currentSkillId);
-            // 필요시: 인게임 HUD/슬롯 즉시 갱신 (이벤트, 델리게이트, 직접 호출 등)
-            Debug.Log($"{currentSkillId}가 {slotIdx+1}번 슬롯에 장착됨");
+            // 필요시 인게임 HUD/슬롯 동기화
         }
     }
 }

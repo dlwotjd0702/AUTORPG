@@ -18,33 +18,39 @@ namespace Inventory
         public Transform accessoryContent;
         public Transform skillContent;
 
-        [Header("패널 GameObject")] public GameObject weaponPanel;
+        [Header("패널 GameObject")]
+        public GameObject weaponPanel;
         public GameObject armorPanel;
         public GameObject accessoryPanel;
         public GameObject skillPanel;
 
-        [Header("슬롯 프리팹 (CatalogSlotUI 필수)")] public GameObject slotPrefab;
+        [Header("슬롯 프리팹 (CatalogSlotUI 필수)")]
+        public GameObject slotPrefab;
 
-        [Header("슬롯 풀(패널별)")] public List<GameObject> weaponSlots = new List<GameObject>();
+        [Header("슬롯 풀(패널별)")]
+        public List<GameObject> weaponSlots = new List<GameObject>();
         public List<GameObject> armorSlots = new List<GameObject>();
         public List<GameObject> accessorySlots = new List<GameObject>();
         public List<GameObject> skillSlots = new List<GameObject>();
 
-        [Header("오른쪽 상세패널")] public ItemDetailPanel detailPanel;
+        [Header("상세패널(무기/방어구/악세)")]
+        public ItemDetailPanel itemDetailPanel; // 무기/방어구/악세서리용(공용 or 분리)
+        [Header("상세패널(스킬)")]
+        public SkillDetailPanel skillDetailPanel;
 
         void Start()
         {
-            InitSlotPool(weaponContent, weaponSlots, inventory.GetAllOfType(ItemType.Weapon).Count);
-            InitSlotPool(armorContent, armorSlots, inventory.GetAllOfType(ItemType.Armor).Count);
-            InitSlotPool(accessoryContent, accessorySlots, inventory.GetAllOfType(ItemType.Accessory).Count);
-            InitSlotPool(skillContent, skillSlots, inventory.GetAllOfType(ItemType.Skill).Count);
+            InitSlotPool(weaponContent, weaponSlots, inventory.GetAllOfType(ItemType.Weapon).Count, OnWeaponSlotClicked);
+            InitSlotPool(armorContent, armorSlots, inventory.GetAllOfType(ItemType.Armor).Count, OnArmorSlotClicked);
+            InitSlotPool(accessoryContent, accessorySlots, inventory.GetAllOfType(ItemType.Accessory).Count, OnAccessorySlotClicked);
+            InitSlotPool(skillContent, skillSlots, inventory.GetAllOfType(ItemType.Skill).Count, OnSkillSlotClicked);
 
             inventory.AddItemById("weapon_01", 1);
 
-            ShowPanel(ItemType.Skill); // 무기부터 보이게
+            ShowPanel(ItemType.Weapon); // 무기부터 보이게
         }
 
-        void InitSlotPool(Transform parent, List<GameObject> pool, int count)
+        void InitSlotPool(Transform parent, List<GameObject> pool, int count, Action<string> onClickFunc)
         {
             pool.Clear();
             for (int i = 0; i < count; i++)
@@ -53,14 +59,12 @@ namespace Inventory
                 pool.Add(obj);
                 obj.SetActive(false);
 
-                // 슬롯 프리팹에 반드시 CatalogSlotUI 붙어야 함
                 var slotUI = obj.GetComponent<CatalogSlotUI>();
                 if (slotUI == null)
                     Debug.LogError("slotPrefab에 CatalogSlotUI 컴포넌트를 붙이세요!");
 
-                // 중복 리스너 방지
                 slotUI.OnSlotClicked = null;
-                slotUI.OnSlotClicked += OnCatalogSlotClicked;
+                slotUI.OnSlotClicked += onClickFunc;
             }
         }
 
@@ -70,6 +74,10 @@ namespace Inventory
             armorPanel.SetActive(type == ItemType.Armor);
             accessoryPanel.SetActive(type == ItemType.Accessory);
             skillPanel.SetActive(type == ItemType.Skill);
+
+            // 상세 패널 숨기기(초기화)
+            itemDetailPanel?.gameObject.SetActive(false);
+            skillDetailPanel?.gameObject.SetActive(false);
 
             switch (type)
             {
@@ -112,14 +120,30 @@ namespace Inventory
             }
         }
 
-        void OnCatalogSlotClicked(string id)
+        // 무기/방어구/악세 클릭 → 공용 상세패널
+        void OnWeaponSlotClicked(string id)
         {
-            // 오른쪽 상세 패널 활성화 및 정보 갱신
-            detailPanel.ShowDetail(id);
+            itemDetailPanel.ShowDetail(id);
         }
-        
-        // 무기 카테고리 버튼 클릭용
-        public void OnWeaponCategoryButtonClicked()  { ShowPanel(ItemType.Weapon); }
+        void OnArmorSlotClicked(string id)
+        {
+            itemDetailPanel.ShowDetail(id);
+        }
+        void OnAccessorySlotClicked(string id)
+        {
+            itemDetailPanel.ShowDetail(id);
+        }
+        // 스킬 클릭 → 별도 패널
+        void OnSkillSlotClicked(string id)
+        {
+            skillDetailPanel.ShowDetail(id);
+        }
+
+        // 카테고리 버튼
+        public void OnWeaponCategoryButtonClicked() { ShowPanel(ItemType.Weapon); }
+        public void OnArmorCategoryButtonClicked() { ShowPanel(ItemType.Armor); }
+        public void OnAccessoryCategoryButtonClicked() { ShowPanel(ItemType.Accessory); }
+        public void OnSkillCategoryButtonClicked() { ShowPanel(ItemType.Skill); }
 
         public void testButtonClicked()
         {
@@ -128,19 +152,5 @@ namespace Inventory
             inventory.AddItemById("ring_01", 1);
             inventory.AddItemById("skill_01", 1);
         }
-
-// 방어구 카테고리 버튼 클릭용
-        public void OnArmorCategoryButtonClicked()   { ShowPanel(ItemType.Armor); }
-
-// 악세서리 카테고리 버튼 클릭용
-        public void OnAccessoryCategoryButtonClicked() { ShowPanel(ItemType.Accessory); }
-
-// 스킬 카테고리 버튼 클릭용
-        public void OnSkillCategoryButtonClicked()   { ShowPanel(ItemType.Skill); }
-
     }
-    
-    
-
 }
-
