@@ -1,5 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 
-# NotoSansKR-Regular SDF.asset 파일은 Git LFS로 추적
-C:\Users\KGA\Documents\GitHub\AUTORPG\Assets\Resources\Font\Noto_Sans_KR\static\NotoSansKR-Regular SDF.asset filter=lfs diff=lfs merge=lfs -text
+# ─────────── Git LFS 설정 ───────────
+
+Assets/Resources/Font/**/ filter=lfs diff=lfs merge=lfs -text
