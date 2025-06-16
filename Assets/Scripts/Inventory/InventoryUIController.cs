@@ -18,33 +18,30 @@ namespace Inventory
         public Transform accessoryContent;
         public Transform skillContent;
 
-        [Header("패널 GameObject")]
-        public GameObject weaponPanel;
+        [Header("패널 GameObject")] public GameObject weaponPanel;
         public GameObject armorPanel;
         public GameObject accessoryPanel;
         public GameObject skillPanel;
 
-        [Header("슬롯 프리팹")]
-        public GameObject slotPrefab;
+        [Header("슬롯 프리팹 (CatalogSlotUI 필수)")] public GameObject slotPrefab;
 
-        [Header("슬롯 풀(패널별)")]
-        public List<GameObject> weaponSlots = new List<GameObject>();
+        [Header("슬롯 풀(패널별)")] public List<GameObject> weaponSlots = new List<GameObject>();
         public List<GameObject> armorSlots = new List<GameObject>();
         public List<GameObject> accessorySlots = new List<GameObject>();
         public List<GameObject> skillSlots = new List<GameObject>();
 
+        [Header("오른쪽 상세패널")] public ItemDetailPanel detailPanel;
+
         void Start()
         {
-            // (슬롯 풀 초기화는 그대로)
             InitSlotPool(weaponContent, weaponSlots, inventory.GetAllOfType(ItemType.Weapon).Count);
             InitSlotPool(armorContent, armorSlots, inventory.GetAllOfType(ItemType.Armor).Count);
             InitSlotPool(accessoryContent, accessorySlots, inventory.GetAllOfType(ItemType.Accessory).Count);
             InitSlotPool(skillContent, skillSlots, inventory.GetAllOfType(ItemType.Skill).Count);
 
-            // ===== 여기 추가! =====
             inventory.AddItemById("weapon_01", 1);
 
-            ShowPanel(ItemType.Weapon); // 무기부터 보이게
+            ShowPanel(ItemType.Skill); // 무기부터 보이게
         }
 
         void InitSlotPool(Transform parent, List<GameObject> pool, int count)
@@ -54,9 +51,16 @@ namespace Inventory
             {
                 var obj = Instantiate(slotPrefab, parent);
                 pool.Add(obj);
-                obj.SetActive(false); // 시작 시 전부 숨김
-                int idx = i;
-                obj.GetComponent<Button>().onClick.AddListener(() => OnCatalogSlotClick(parent, idx));
+                obj.SetActive(false);
+
+                // 슬롯 프리팹에 반드시 CatalogSlotUI 붙어야 함
+                var slotUI = obj.GetComponent<CatalogSlotUI>();
+                if (slotUI == null)
+                    Debug.LogError("slotPrefab에 CatalogSlotUI 컴포넌트를 붙이세요!");
+
+                // 중복 리스너 방지
+                slotUI.OnSlotClicked = null;
+                slotUI.OnSlotClicked += OnCatalogSlotClicked;
             }
         }
 
@@ -69,10 +73,14 @@ namespace Inventory
 
             switch (type)
             {
-                case ItemType.Weapon:     RefreshPanel(weaponSlots, inventory.GetAllOfType(ItemType.Weapon), type); break;
-                case ItemType.Armor:      RefreshPanel(armorSlots, inventory.GetAllOfType(ItemType.Armor), type); break;
-                case ItemType.Accessory:  RefreshPanel(accessorySlots, inventory.GetAllOfType(ItemType.Accessory), type); break;
-                case ItemType.Skill:      RefreshPanel(skillSlots, inventory.GetAllOfType(ItemType.Skill), type); break;
+                case ItemType.Weapon:
+                    RefreshPanel(weaponSlots, inventory.GetAllOfType(ItemType.Weapon), type); break;
+                case ItemType.Armor:
+                    RefreshPanel(armorSlots, inventory.GetAllOfType(ItemType.Armor), type); break;
+                case ItemType.Accessory:
+                    RefreshPanel(accessorySlots, inventory.GetAllOfType(ItemType.Accessory), type); break;
+                case ItemType.Skill:
+                    RefreshPanel(skillSlots, inventory.GetAllOfType(ItemType.Skill), type); break;
             }
         }
 
@@ -83,7 +91,19 @@ namespace Inventory
                 if (i < catalog.Count)
                 {
                     slotObjs[i].SetActive(true);
-                    UpdateCatalogSlotUI(slotObjs[i], catalog[i], type);
+                    var slotUI = slotObjs[i].GetComponent<CatalogSlotUI>();
+                    var data = catalog[i];
+                    bool owned = inventory.IsOwned(data.id);
+                    int count = inventory.GetOwnedCount(data.id);
+                    bool equipped = inventory.GetSlotById(data.id)?.isEquipped == true;
+
+                    slotUI.SetSlot(
+                        data.id,
+                        inventory.GetIcon(data.id),
+                        count,
+                        equipped,
+                        owned
+                    );
                 }
                 else
                 {
@@ -92,71 +112,35 @@ namespace Inventory
             }
         }
 
-        void UpdateCatalogSlotUI(GameObject obj, EquipmentData data, ItemType type)
+        void OnCatalogSlotClicked(string id)
         {
-            var icon = obj.transform.Find("Icon").GetComponent<Image>();
-            var countText = obj.transform.Find("CountText").GetComponent<TextMeshProUGUI>();
-            var equipMark = obj.transform.Find("EquippedMark")?.GetComponent<Image>();
+            // 오른쪽 상세 패널 활성화 및 정보 갱신
+            detailPanel.ShowDetail(id);
+        }
+        
+        // 무기 카테고리 버튼 클릭용
+        public void OnWeaponCategoryButtonClicked()  { ShowPanel(ItemType.Weapon); }
 
-            icon.sprite = inventory.GetIcon(data.id);
-            bool owned = inventory.IsOwned(data.id);
-            int count = inventory.GetOwnedCount(data.id);
-            icon.color = owned ? Color.white : new Color(1,1,1,0.3f); // 보유: 선명, 미보유: 불투명
-            countText.text = $"{count}/2";
-            if (equipMark) equipMark.enabled = owned && inventory.GetSlotById(data.id)?.isEquipped == true;
-
-            // 슬롯에 EquipmentData 연결 (필요시)
-            obj.GetComponent<SlotLink>()?.SetEquipment(data);
+        public void testButtonClicked()
+        {
+            inventory.AddItemById("weapon_01", 1);
+            inventory.AddItemById("armor_01", 1);
+            inventory.AddItemById("ring_01", 1);
+            inventory.AddItemById("skill_01", 1);
         }
 
-        void OnCatalogSlotClick(Transform parent, int idx)
-        {
-            ItemType type;
-            List<EquipmentData> catalog = null;
-            if (parent == weaponContent)      { type = ItemType.Weapon;     catalog = inventory.GetAllOfType(type); }
-            else if (parent == armorContent)  { type = ItemType.Armor;      catalog = inventory.GetAllOfType(type); }
-            else if (parent == accessoryContent) { type = ItemType.Accessory; catalog = inventory.GetAllOfType(type); }
-            else if (parent == skillContent)  { type = ItemType.Skill;      catalog = inventory.GetAllOfType(type); }
-            else return;
+// 방어구 카테고리 버튼 클릭용
+        public void OnArmorCategoryButtonClicked()   { ShowPanel(ItemType.Armor); }
 
-            if (idx >= catalog.Count) return;
-            var data = catalog[idx];
-            bool owned = inventory.IsOwned(data.id);
+// 악세서리 카테고리 버튼 클릭용
+        public void OnAccessoryCategoryButtonClicked() { ShowPanel(ItemType.Accessory); }
 
-            if (!owned)
-            {
-                Debug.Log($"{data.name}은(는) 아직 미보유.");
-                // 팝업, 획득 경로 안내 등 추가 가능
-                return;
-            }
+// 스킬 카테고리 버튼 클릭용
+        public void OnSkillCategoryButtonClicked()   { ShowPanel(ItemType.Skill); }
 
-            // 장비라면 장착
-            if (type == ItemType.Weapon || type == ItemType.Armor || type == ItemType.Accessory)
-            {
-                bool equipped = inventory.Equip(data.id);
-                if (equipped)
-                {
-                    Debug.Log($"{data.name} 장착됨!");
-                    player?.OnStatsChanged();
-                }
-                else
-                {
-                    Debug.Log($"{data.name} 장착 실패(조건 불충분)");
-                }
-                // 해당 패널만 다시 갱신
-                ShowPanel(type);
-            }
-            else
-            {
-                // 스킬은 추후 추가
-            }
-        }
     }
+    
+    
 
-    // 도감용 슬롯(EquipmentData 연결)
-    public class SlotLink : MonoBehaviour
-    {
-        public EquipmentData linkedData;
-        public void SetEquipment(EquipmentData data) { linkedData = data; }
-    }
 }
+

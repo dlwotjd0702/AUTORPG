@@ -5,13 +5,13 @@ public class SkillSlotManager : MonoBehaviour
 {
     public InventorySystem inventory;
     public int skillSlotCount = 6;
-    public InventorySlot[] skillSlots;
+    public Item[] skillSlots;
 
     private void Awake()
     {
-        skillSlots = new InventorySlot[skillSlotCount];
+        skillSlots = new Item[skillSlotCount];
         for (int i = 0; i < skillSlotCount; i++)
-            skillSlots[i] = new InventorySlot();
+            skillSlots[i] = new Item();
     }
 
     // 슬롯번호, 스킬id로 장착 (보유중인 스킬만)

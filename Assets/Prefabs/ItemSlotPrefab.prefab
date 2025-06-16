@@ -296,6 +296,7 @@ GameObject:
   - component: {fileID: 2841232673449442949}
   - component: {fileID: 6290938192881007885}
   - component: {fileID: 8472785855030780473}
+  - component: {fileID: 1349111314198574390}
   m_Layer: 5
   m_Name: ItemSlotPrefab
   m_TagString: Untagged
@@ -406,4 +407,32 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6290938192881007885}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1349111314198574390}
+        m_TargetAssemblyTypeName: CatalogSlotUI, Assembly-CSharp
+        m_MethodName: OnClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &1349111314198574390
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4167711999626388291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2540ac57ebc94d5eb519fadf671ddca6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iconImage: {fileID: 7693796791715478992}
+  countText: {fileID: 4016117777746934841}
+  equippedMark: {fileID: 9153153189278250542}
+  itemId: 

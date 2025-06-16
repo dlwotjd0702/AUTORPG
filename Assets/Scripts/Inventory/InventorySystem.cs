@@ -13,7 +13,7 @@ namespace Inventory
     public class InventorySystem : MonoBehaviour
     {
         public int slotCount = 100;
-        public InventorySlot[] slots;
+        public Item[] slots;
 
         // TSV 데이터 (도감)
         public List<EquipmentData> dataList = new List<EquipmentData>();
@@ -21,13 +21,16 @@ namespace Inventory
 
         // 아이콘 테이블 (SO)
         public EquipmentIconTableSO iconTableSO;
+        
+        public const int SkillSlotCount = 4;
+        public string[] equippedSkillIds = new string[SkillSlotCount];
 
         private void Awake()
         {
             // 슬롯 초기화 (보유 슬롯)
-            slots = new InventorySlot[slotCount];
+            slots = new Item[slotCount];
             for (int i = 0; i < slotCount; i++)
-                slots[i] = new InventorySlot();
+                slots[i] = new Item();
 
             // TSV 파싱 (CsvHelper 사용)
             string path = Path.Combine(Application.streamingAssetsPath, "equipment.tsv");
@@ -64,6 +67,7 @@ namespace Inventory
             }
             return list;
         }
+        
 
         public EquipmentData GetEquipmentData(string id)
         {
@@ -73,6 +77,13 @@ namespace Inventory
         public Sprite GetIcon(string id)
         {
             return iconTableSO ? iconTableSO.GetSprite(id) : null;
+        }
+        public Item GetOwnedSlotById(string id)
+        {
+            foreach (var slot in slots)
+                if (slot.itemData != null && slot.itemData.id == id && slot.isOwned)
+                    return slot;
+            return null;
         }
 
         // ===== [도감 기능] =====
@@ -242,7 +253,7 @@ namespace Inventory
             return val;
         }
 
-        public InventorySlot GetSlotById(string id)
+        public Item GetSlotById(string id)
         {
             foreach (var slot in slots)
                 if (!slot.IsEmpty && slot.itemData.id == id)
@@ -250,10 +261,22 @@ namespace Inventory
             return null;
         }
 
+        public static string GetNextId(string id)
+        {
+            int underscoreIdx = id.LastIndexOf('_');
+            if (underscoreIdx < 0) return id;
+            string prefix = id.Substring(0, underscoreIdx + 1);
+            string numStr = id.Substring(underscoreIdx + 1);
+            if (int.TryParse(numStr, out int num))
+                return $"{prefix}{(num + 1):D2}";
+            else
+                return id;
+        }
+
         public bool TryCombine(string itemId, int requireCount = 2)
         {
             int totalCount = 0;
-            InventorySlot targetSlot = null;
+            Item targetSlot = null;
             for (int i = 0; i < slots.Length; i++)
             {
                 if (!slots[i].IsEmpty && slots[i].itemData.id == itemId)
@@ -265,15 +288,21 @@ namespace Inventory
             if (targetSlot == null || totalCount < requireCount) return false;
 
             EquipmentData baseData = targetSlot.itemData;
-            EquipmentData newItem = baseData.Clone();
-            newItem.grade += 1;
-            newItem.name = baseData.name + " +" + newItem.grade;
+            string nextId = GetNextId(baseData.id);
+            EquipmentData newItemData = GetEquipmentData(nextId);
+
+            if (newItemData == null)
+            {
+                Debug.LogError("[Combine] 다음 등급 id가 도감에 없음: " + nextId);
+                return false;
+            }
 
             RemoveItem(itemId, requireCount);
-            AddItem(newItem, 1);
+            AddItem(newItemData, 1);
 
             return true;
         }
+
 
         public bool RemoveItem(string id, int amount = 1)
         {
@@ -283,11 +312,28 @@ namespace Inventory
                 {
                     slots[i].count -= amount;
                     if (slots[i].count <= 0)
-                        slots[i].Clear();
-                    return true;
+                        //slots[i].Clear();
+                        return true;
                 }
             }
             return false;
+        }
+        public void EquipSkill(int slotIdx, string skillId)
+        {
+            equippedSkillIds[slotIdx] = skillId;
+            // 필요하면: 인게임 UI/슬롯 등과 연동(이벤트, 직접 호출 등)
+        }
+
+        public void EnhanceSkill(string skillId)
+        {
+            var item = GetSlotById(skillId);
+            if (item != null) item.level++; // 강화 예시
+        }
+
+        public void CombineSkill(string skillId)
+        {
+            // Combine 로직: TryCombine 또는 맞는 함수 호출
+            TryCombine(skillId, 2);
         }
     }
 }
