@@ -54,45 +54,45 @@ MonoBehaviour:
   - id: armor_20
     sprite: {fileID: -265193187, guid: 6782b853aa6d594448855a100bb46e99, type: 3}
   - id: weapon_01
-    sprite: {fileID: -1386649126, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: 426731117, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_02
-    sprite: {fileID: -1066563636, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: -136428829, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_03
-    sprite: {fileID: 1202577341, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: -1894982966, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_04
-    sprite: {fileID: 949784339, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: 90033214, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_05
-    sprite: {fileID: 1608081369, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: 547824378, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_06
-    sprite: {fileID: -1146597593, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: -477822233, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_07
-    sprite: {fileID: -1659220557, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: 1897360, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_08
-    sprite: {fileID: 729895389, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: 376186700, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_09
-    sprite: {fileID: -798059706, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: -1360240286, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_10
-    sprite: {fileID: -1090581913, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: 1076711368, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_11
-    sprite: {fileID: -1333716801, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: 862606291, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_12
-    sprite: {fileID: 748942695, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: -1891686219, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_13
-    sprite: {fileID: -1740514050, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: 992366279, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_14
-    sprite: {fileID: 892963397, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: -12320365, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_15
-    sprite: {fileID: 98217048, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: -469304616, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_16
-    sprite: {fileID: -472263681, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: -1478398669, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_17
-    sprite: {fileID: 1491948207, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: -365041093, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_18
-    sprite: {fileID: 1035153294, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: 1599970197, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_19
-    sprite: {fileID: -505618481, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: 1191864170, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: weapon_20
-    sprite: {fileID: 388675134, guid: 0cb396d2007ebe240b10e677607a1cda, type: 3}
+    sprite: {fileID: -1663784490, guid: 0cc6d5a21ecda6b49aa0d66bec80eb15, type: 3}
   - id: ring_01
     sprite: {fileID: -881127647, guid: ba23d4668ca5497408959f553dbec108, type: 3}
   - id: ring_02

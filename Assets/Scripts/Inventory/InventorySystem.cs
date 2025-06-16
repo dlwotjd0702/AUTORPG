@@ -8,14 +8,14 @@ using System.Linq;
 
 namespace Inventory
 {
-  
+    [DefaultExecutionOrder(-100)]
     [System.Serializable]
     public class InventorySystem : MonoBehaviour
     {
         public int slotCount = 100;
         public InventorySlot[] slots;
 
-        // TSV 데이터
+        // TSV 데이터 (도감)
         public List<EquipmentData> dataList = new List<EquipmentData>();
         public Dictionary<string, EquipmentData> dataDict = new Dictionary<string, EquipmentData>();
 
@@ -24,7 +24,7 @@ namespace Inventory
 
         private void Awake()
         {
-            // 슬롯 초기화
+            // 슬롯 초기화 (보유 슬롯)
             slots = new InventorySlot[slotCount];
             for (int i = 0; i < slotCount; i++)
                 slots[i] = new InventorySlot();
@@ -65,7 +65,6 @@ namespace Inventory
             return list;
         }
 
-
         public EquipmentData GetEquipmentData(string id)
         {
             dataDict.TryGetValue(id, out var data);
@@ -76,6 +75,29 @@ namespace Inventory
             return iconTableSO ? iconTableSO.GetSprite(id) : null;
         }
 
+        // ===== [도감 기능] =====
+        public List<EquipmentData> GetAllOfType(ItemType type)
+        {
+            return dataList.Where(x => x.type == type).ToList();
+        }
+
+        // ===== [보유 체크] =====
+        public bool IsOwned(string id)
+        {
+            foreach (var slot in slots)
+                if (slot.itemData != null && slot.itemData.id == id && slot.isOwned)
+                    return true;
+            return false;
+        }
+        public int GetOwnedCount(string id)
+        {
+            foreach (var slot in slots)
+                if (slot.itemData != null && slot.itemData.id == id && slot.isOwned)
+                    return slot.count;
+            return 0;
+        }
+
+        // ===== [보유/획득 시스템(기존)] =====
         public bool AddItem(EquipmentData item, int amount = 1)
         {
             for (int i = 0; i < slots.Length; i++)
@@ -99,7 +121,6 @@ namespace Inventory
             }
             return false; // 인벤토리 풀
         }
-
         public bool AddItemById(string id, int amount = 1)
         {
             var data = GetEquipmentData(id);
@@ -111,6 +132,7 @@ namespace Inventory
             return AddItem(data, amount);
         }
 
+        // ===== [아래 기존 코드 동일] =====
         public bool Equip(string itemId)
         {
             var target = GetSlotById(itemId);
@@ -140,7 +162,6 @@ namespace Inventory
             return false;
         }
 
-        // 무기: 공격력, 공격속도
         public (float atkMul, float atkSpdMul) GetWeaponMultipliers()
         {
             float atk = 0f, atkSpd = 0f;
@@ -162,7 +183,6 @@ namespace Inventory
             return (1f + atk, 1f + atkSpd);
         }
 
-        // 방어구: 방어력, 체력
         public (float defMul, float hpMul) GetArmorMultipliers()
         {
             float def = 0f, hp = 0f;
@@ -184,7 +204,6 @@ namespace Inventory
             return (1f + def, 1f + hp);
         }
 
-        // 악세: 크리확률, 크리뎀
         public (float critRateMul, float critDmgMul) GetAccessoryMultipliers()
         {
             float critRate = 0f, critDmg = 0f;

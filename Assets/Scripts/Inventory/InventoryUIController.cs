@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using IdleRPG;
 using TMPro;
@@ -32,17 +33,18 @@ namespace Inventory
         public List<GameObject> accessorySlots = new List<GameObject>();
         public List<GameObject> skillSlots = new List<GameObject>();
 
-        [Header("슬롯 풀 개수(최대)")]
-        public int slotCountPerPanel = 20;
-
         void Start()
         {
-            InitSlotPool(weaponContent, weaponSlots, slotCountPerPanel);
-            InitSlotPool(armorContent, armorSlots, slotCountPerPanel);
-            InitSlotPool(accessoryContent, accessorySlots, slotCountPerPanel);
-            InitSlotPool(skillContent, skillSlots, slotCountPerPanel);
+            // (슬롯 풀 초기화는 그대로)
+            InitSlotPool(weaponContent, weaponSlots, inventory.GetAllOfType(ItemType.Weapon).Count);
+            InitSlotPool(armorContent, armorSlots, inventory.GetAllOfType(ItemType.Armor).Count);
+            InitSlotPool(accessoryContent, accessorySlots, inventory.GetAllOfType(ItemType.Accessory).Count);
+            InitSlotPool(skillContent, skillSlots, inventory.GetAllOfType(ItemType.Skill).Count);
 
-            ShowPanel(ItemType.Weapon);
+            // ===== 여기 추가! =====
+            inventory.AddItemById("weapon_01", 1);
+
+            ShowPanel(ItemType.Weapon); // 무기부터 보이게
         }
 
         void InitSlotPool(Transform parent, List<GameObject> pool, int count)
@@ -53,13 +55,11 @@ namespace Inventory
                 var obj = Instantiate(slotPrefab, parent);
                 pool.Add(obj);
                 obj.SetActive(false); // 시작 시 전부 숨김
-                // 슬롯 클릭 이벤트 등록
                 int idx = i;
-                obj.GetComponent<Button>().onClick.AddListener(() => OnSlotButtonClick(parent, idx));
+                obj.GetComponent<Button>().onClick.AddListener(() => OnCatalogSlotClick(parent, idx));
             }
         }
 
-        // 분류 버튼 등에서 호출
         public void ShowPanel(ItemType type)
         {
             weaponPanel.SetActive(type == ItemType.Weapon);
@@ -69,37 +69,21 @@ namespace Inventory
 
             switch (type)
             {
-                case ItemType.Weapon:     RefreshWeaponPanel(); break;
-                case ItemType.Armor:      RefreshArmorPanel(); break;
-                case ItemType.Accessory:  RefreshAccessoryPanel(); break;
-                case ItemType.Skill:      RefreshSkillPanel(); break;
+                case ItemType.Weapon:     RefreshPanel(weaponSlots, inventory.GetAllOfType(ItemType.Weapon), type); break;
+                case ItemType.Armor:      RefreshPanel(armorSlots, inventory.GetAllOfType(ItemType.Armor), type); break;
+                case ItemType.Accessory:  RefreshPanel(accessorySlots, inventory.GetAllOfType(ItemType.Accessory), type); break;
+                case ItemType.Skill:      RefreshPanel(skillSlots, inventory.GetAllOfType(ItemType.Skill), type); break;
             }
         }
 
-        // 인벤토리에서 해당 타입만 필터링
-        List<InventorySlot> GetSlotsByType(ItemType type)
-        {
-            List<InventorySlot> result = new List<InventorySlot>();
-            foreach (var slot in inventory.slots)
-                if (slot.itemData != null && slot.itemData.type == type)
-                    result.Add(slot);
-            return result;
-        }
-
-        void RefreshWeaponPanel()     => RefreshPanel(weaponSlots, GetSlotsByType(ItemType.Weapon));
-        void RefreshArmorPanel()      => RefreshPanel(armorSlots, GetSlotsByType(ItemType.Armor));
-        void RefreshAccessoryPanel()  => RefreshPanel(accessorySlots, GetSlotsByType(ItemType.Accessory));
-        void RefreshSkillPanel()      => RefreshPanel(skillSlots, GetSlotsByType(ItemType.Skill));
-
-        // 핵심: 슬롯 풀을 데이터만큼만 활성화하고 내용 갱신, 나머지는 숨김
-        void RefreshPanel(List<GameObject> slotObjs, List<InventorySlot> slotDatas)
+        void RefreshPanel(List<GameObject> slotObjs, List<EquipmentData> catalog, ItemType type)
         {
             for (int i = 0; i < slotObjs.Count; i++)
             {
-                if (i < slotDatas.Count)
+                if (i < catalog.Count)
                 {
                     slotObjs[i].SetActive(true);
-                    UpdateSlotUI(slotObjs[i], slotDatas[i]);
+                    UpdateCatalogSlotUI(slotObjs[i], catalog[i], type);
                 }
                 else
                 {
@@ -108,73 +92,71 @@ namespace Inventory
             }
         }
 
-        void UpdateSlotUI(GameObject obj, InventorySlot slot)
+        void UpdateCatalogSlotUI(GameObject obj, EquipmentData data, ItemType type)
         {
             var icon = obj.transform.Find("Icon").GetComponent<Image>();
             var countText = obj.transform.Find("CountText").GetComponent<TextMeshProUGUI>();
             var equipMark = obj.transform.Find("EquippedMark")?.GetComponent<Image>();
 
-            icon.sprite = inventory.GetIcon(slot.itemData.id);
-            icon.color = Color.white;
-            countText.text = slot.count > 1 ? slot.count.ToString() : "";
-            if (equipMark) equipMark.enabled = slot.isEquipped;
+            icon.sprite = inventory.GetIcon(data.id);
+            bool owned = inventory.IsOwned(data.id);
+            int count = inventory.GetOwnedCount(data.id);
+            icon.color = owned ? Color.white : new Color(1,1,1,0.3f); // 보유: 선명, 미보유: 불투명
+            countText.text = $"{count}/2";
+            if (equipMark) equipMark.enabled = owned && inventory.GetSlotById(data.id)?.isEquipped == true;
 
-            // 슬롯에 InventorySlot 참조 연결 (컴포넌트 추가도 가능)
-            obj.GetComponent<SlotLink>()?.SetSlot(slot); // 확장 사용 가능
+            // 슬롯에 EquipmentData 연결 (필요시)
+            obj.GetComponent<SlotLink>()?.SetEquipment(data);
         }
 
-        // 슬롯 버튼 클릭 처리 (parent로 어떤 패널인지 구분)
-        void OnSlotButtonClick(Transform parent, int idx)
+        void OnCatalogSlotClick(Transform parent, int idx)
         {
-            List<GameObject> slotPool = null;
-            ItemType type = ItemType.Weapon;
-            if (parent == weaponContent)      { slotPool = weaponSlots; type = ItemType.Weapon; }
-            else if (parent == armorContent)  { slotPool = armorSlots; type = ItemType.Armor; }
-            else if (parent == accessoryContent) { slotPool = accessorySlots; type = ItemType.Accessory; }
-            else if (parent == skillContent)  { slotPool = skillSlots; type = ItemType.Skill; }
+            ItemType type;
+            List<EquipmentData> catalog = null;
+            if (parent == weaponContent)      { type = ItemType.Weapon;     catalog = inventory.GetAllOfType(type); }
+            else if (parent == armorContent)  { type = ItemType.Armor;      catalog = inventory.GetAllOfType(type); }
+            else if (parent == accessoryContent) { type = ItemType.Accessory; catalog = inventory.GetAllOfType(type); }
+            else if (parent == skillContent)  { type = ItemType.Skill;      catalog = inventory.GetAllOfType(type); }
             else return;
 
-            var slotDataList = GetSlotsByType(type);
-            if (idx < slotDataList.Count)
-            {
-                var slot = slotDataList[idx];
-                if (slot.itemData == null) return;
+            if (idx >= catalog.Count) return;
+            var data = catalog[idx];
+            bool owned = inventory.IsOwned(data.id);
 
-                // 무기/방어구/악세 장착처리
-                if (slot.itemData.type == ItemType.Weapon ||
-                    slot.itemData.type == ItemType.Armor ||
-                    slot.itemData.type == ItemType.Accessory)
+            if (!owned)
+            {
+                Debug.Log($"{data.name}은(는) 아직 미보유.");
+                // 팝업, 획득 경로 안내 등 추가 가능
+                return;
+            }
+
+            // 장비라면 장착
+            if (type == ItemType.Weapon || type == ItemType.Armor || type == ItemType.Accessory)
+            {
+                bool equipped = inventory.Equip(data.id);
+                if (equipped)
                 {
-                    bool equipped = inventory.Equip(slot.itemData.id);
-                    if (equipped)
-                    {
-                        Debug.Log($"{slot.itemData.name} 장착됨!");
-                        player?.OnStatsChanged();
-                    }
-                    else
-                    {
-                        Debug.Log($"{slot.itemData.name} 장착 실패(조건 불충분)");
-                    }
-                    // 해당 패널만 다시 갱신!
-                    switch (type)
-                    {
-                        case ItemType.Weapon:     RefreshWeaponPanel(); break;
-                        case ItemType.Armor:      RefreshArmorPanel(); break;
-                        case ItemType.Accessory:  RefreshAccessoryPanel(); break;
-                    }
+                    Debug.Log($"{data.name} 장착됨!");
+                    player?.OnStatsChanged();
                 }
                 else
                 {
-                    Debug.Log($"{slot.itemData.name}은(는) 장착 불가 아이템");
+                    Debug.Log($"{data.name} 장착 실패(조건 불충분)");
                 }
+                // 해당 패널만 다시 갱신
+                ShowPanel(type);
+            }
+            else
+            {
+                // 스킬은 추후 추가
             }
         }
     }
 
-    // [선택사항] 슬롯과 InventorySlot을 연결하고 싶은 경우
+    // 도감용 슬롯(EquipmentData 연결)
     public class SlotLink : MonoBehaviour
     {
-        public InventorySlot linkedSlot;
-        public void SetSlot(InventorySlot slot) { linkedSlot = slot; }
+        public EquipmentData linkedData;
+        public void SetEquipment(EquipmentData data) { linkedData = data; }
     }
 }
