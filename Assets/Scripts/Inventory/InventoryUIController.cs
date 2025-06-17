@@ -38,6 +38,8 @@ namespace Inventory
         [Header("상세패널(스킬)")]
         public SkillDetailPanel skillDetailPanel;
 
+        private ItemType currentPanelType = ItemType.Weapon;
+        
         void Start()
         {
             InitSlotPool(weaponContent, weaponSlots, inventory.GetAllOfType(ItemType.Weapon).Count, OnWeaponSlotClicked);
@@ -48,6 +50,8 @@ namespace Inventory
             inventory.AddItemById("weapon_01", 1);
 
             ShowPanel(ItemType.Weapon); // 무기부터 보이게
+            inventory.OnInventoryChanged += () => ShowPanel(currentPanelType);
+           
         }
 
         void InitSlotPool(Transform parent, List<GameObject> pool, int count, Action<string> onClickFunc)
@@ -90,6 +94,7 @@ namespace Inventory
                 case ItemType.Skill:
                     RefreshPanel(skillSlots, inventory.GetAllOfType(ItemType.Skill), type); break;
             }
+            currentPanelType = type;
         }
 
         void RefreshPanel(List<GameObject> slotObjs, List<EquipmentData> catalog, ItemType type)

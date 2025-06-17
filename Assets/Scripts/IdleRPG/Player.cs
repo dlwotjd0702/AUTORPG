@@ -55,6 +55,7 @@ namespace IdleRPG
 
             playerStats.RefreshStats();
             ApplyStatsToPlayer();
+            playerStats.OnStatsChanged += ApplyStatsToPlayer;
         }
 
         void Start()
@@ -126,18 +127,11 @@ namespace IdleRPG
             if (weaponCollider) weaponCollider.enabled = false;
         }
 
-        // 외부에서 스탯 변동 시 호출 (ex. 장비, 스킬, 강화, 합성, 버프 등)
-        public void OnStatsChanged()
-        {
-            playerStats.RefreshStats();
-            ApplyStatsToPlayer();
-        }
-
-        // 예시: 현재 최종 스탯을 바로 참조 (UI, 전투 등에서 활용)
+      
         public float FinalAttack => playerStats.FinalAttack;
-        public float FinalDefense => playerStats.FinalDefense;
-        public float FinalHp => playerStats.FinalHp;
         public float FinalAtkSpeed => playerStats.FinalAtkSpeed;
+        public float FinalHp => playerStats.FinalHp;
+        public float FinalDefense => playerStats.FinalDefense;
         public float FinalCritRate => playerStats.FinalCritRate;
         public float FinalCritDmg => playerStats.FinalCritDmg;
     }

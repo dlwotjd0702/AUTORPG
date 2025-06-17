@@ -1,3 +1,4 @@
+using System;
 using Inventory;
 using UnityEngine;
 
@@ -22,6 +23,11 @@ public class PlayerStats : MonoBehaviour
         // 자동으로 Player 컴포넌트 찾아서 연결
         if (!player) player = GetComponent<IdleRPG.Player>();
         if (!inventory) inventory = GetComponent<InventorySystem>();
+    }
+
+    private void Start()
+    {
+        inventory.OnInventoryChanged += RefreshStats;
     }
 
     public void RefreshStats()

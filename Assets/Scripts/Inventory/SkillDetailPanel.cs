@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Serialization;
 
 namespace Inventory
 {
@@ -10,7 +11,7 @@ namespace Inventory
         public TextMeshProUGUI nameText;
         public TextMeshProUGUI levelText;
         public TextMeshProUGUI descText;
-        public TextMeshProUGUI costText;
+        public TextMeshProUGUI cooltimeText;
         public Button enhanceBtn;
         public Button combineBtn;
         public Button[] equipButtons; // 4개
@@ -36,7 +37,7 @@ namespace Inventory
             nameText.text = skillData.name;
             levelText.text = $"Lv.{skillData.grade}";
             descText.text = skillData.description;
-            costText.text = $"코스트: {skillData.cooldown ?? 0:F1}초";
+            cooltimeText.text = $"쿨타임: {skillData.cooldown ?? 0:F1}초";
             enhanceBtn.onClick.RemoveAllListeners();
             combineBtn.onClick.RemoveAllListeners();
             enhanceBtn.onClick.AddListener(OnEnhance);
@@ -47,6 +48,8 @@ namespace Inventory
                 int idx = i;
                 equipButtons[i].onClick.RemoveAllListeners();
                 equipButtons[i].onClick.AddListener(() => OnEquip(idx));
+                bool equipped = (inventory.equippedSkillIds[idx] == skillId);
+                equipButtons[i].GetComponent<Image>().color = equipped ? Color.yellow : Color.white;
             }
         }
 
@@ -63,6 +66,8 @@ namespace Inventory
         void OnEquip(int slotIdx)
         {
             inventory.EquipSkill(slotIdx, currentSkillId);
+            FindObjectOfType<SkillQuickSlotUI>()?.Refresh();
+            ShowDetail(currentSkillId);
             // 필요시 인게임 HUD/슬롯 동기화
         }
     }

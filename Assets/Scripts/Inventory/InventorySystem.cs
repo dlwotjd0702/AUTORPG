@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
@@ -14,7 +15,7 @@ namespace Inventory
     {
         public int slotCount = 100;
         public Item[] slots;
-
+        public event Action OnInventoryChanged;
         // TSV 데이터 (도감)
         public List<EquipmentData> dataList = new List<EquipmentData>();
         public Dictionary<string, EquipmentData> dataDict = new Dictionary<string, EquipmentData>();
@@ -117,6 +118,7 @@ namespace Inventory
                 {
                     slots[i].count += amount;
                     slots[i].isOwned = true;
+                    OnInventoryChanged?.Invoke();
                     return true;
                 }
             }
@@ -127,6 +129,7 @@ namespace Inventory
                     slots[i].itemData = item;
                     slots[i].count = amount;
                     slots[i].isOwned = true;
+                    OnInventoryChanged?.Invoke();
                     return true;
                 }
             }
@@ -141,6 +144,23 @@ namespace Inventory
                 return false;
             }
             return AddItem(data, amount);
+        }
+        public bool RemoveItem(string id, int amount = 1)
+        {
+            for (int i = 0; i < slots.Length; i++)
+            {
+                if (!slots[i].IsEmpty && slots[i].itemData.id == id)
+                {
+                    slots[i].count -= amount;
+                    if (slots[i].count <= 0)
+                    {
+                        slots[i].count = 0;
+                        OnInventoryChanged?.Invoke();
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         // ===== [아래 기존 코드 동일] =====
@@ -304,20 +324,7 @@ namespace Inventory
         }
 
 
-        public bool RemoveItem(string id, int amount = 1)
-        {
-            for (int i = 0; i < slots.Length; i++)
-            {
-                if (!slots[i].IsEmpty && slots[i].itemData.id == id)
-                {
-                    slots[i].count -= amount;
-                    if (slots[i].count <= 0)
-                        //slots[i].Clear();
-                        return true;
-                }
-            }
-            return false;
-        }
+        
         public void EquipSkill(int slotIdx, string skillId)
         {
             equippedSkillIds[slotIdx] = skillId;
