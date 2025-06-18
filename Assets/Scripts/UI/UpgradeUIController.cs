@@ -104,7 +104,13 @@ namespace Stats
                 RefreshUI();
         }
 
-        // 골드가 외부에서 바뀌었을 때도 RefreshUI를 호출해야 한다면,
-        // UpgradeManager에서 골드가 바뀌면 이벤트를 발행하고, 여기서 구독해서 RefreshUI()를 실행해주면 된다.
+        public void OnCloseButton()
+        {
+            gameObject.SetActive(false);
+        }
+        public void OnOpenButton()
+        {
+            gameObject.SetActive(true);
+        }
     }
 }
