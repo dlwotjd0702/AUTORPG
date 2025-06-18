@@ -63,6 +63,7 @@ namespace IdleRPG
 
         public override void OnSLStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
+            tMonoBehaviour.DisableWeaponCollider();
             tMonoBehaviour.isAttacking = false;
             waitingForAttackAnimEnd = false;
         }

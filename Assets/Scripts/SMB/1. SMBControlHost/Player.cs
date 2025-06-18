@@ -1,47 +1,42 @@
+using Combat;
+using Stats;
 using UnityEngine;
 
 namespace IdleRPG
 {
-    [DefaultExecutionOrder(100)]
-    public class Player : MonoBehaviour, IDamageable
+   
+    public class Player : MonoBehaviour, IDamageable, IAttackStat
     {
+        [Header("Base Move & Range")]
         public float moveSpeed = 5f;
         public float attackRange = 2f;
-        public float attackCooldown = 1f;
 
         public Animator animator;
         public Collider weaponCollider;
 
-        [Header("Base Stats")]
-        public int baseAttack = 5;
-        public float baseAtkSpeed = 1.0f;
-        public int baseDefense = 0;
-        public int baseHp = 10;
-        public float baseCritRate = 0.05f;   // 5%
-        public float baseCritDmg = 1.5f;   
-
-        [Header("레벨/경험치")]
-        public int level = 1;
-        public int exp = 0;
-        public int expToLevelUp = 100;
+        [Header("컴포넌트 참조")]
+        public PlayerStats playerStats;
 
         [Header("상태")]
         public bool isDead = false;
-        [HideInInspector] public float currentHp;
+        public float currentHp;
         [HideInInspector] public float MaxHp;
         [HideInInspector] public bool isAttacking = false;
         [HideInInspector] public bool isMoving = false;
         [HideInInspector] public GameObject target;
-
-        // 스탯 연동 시스템
-        public PlayerStats playerStats;
+        public float FinalAttack => playerStats.FinalAttack;
+        public float FinalAtkSpeed => playerStats.FinalAtkSpeed;
+        public float FinalHp => playerStats.FinalHp;
+        public float FinalDefense => playerStats.FinalDefense;
+        public float FinalCritRate => playerStats.FinalCritRate;
+        public float FinalCritDmg => playerStats.FinalCritDmg;
 
         void Awake()
         {
             if (!animator) animator = GetComponent<Animator>();
             if (weaponCollider) weaponCollider.enabled = false;
             if (!playerStats) playerStats = GetComponent<PlayerStats>();
-            currentHp = baseHp;
+            
         }
 
         private void OnEnable()
@@ -53,48 +48,30 @@ namespace IdleRPG
 
             SceneLinkedSMB<Player>.Initialise(animator, this);
 
-            playerStats.RefreshStats();
-            ApplyStatsToPlayer();
             playerStats.OnStatsChanged += ApplyStatsToPlayer;
-        }
-
-        void Start()
-        {
             playerStats.RefreshStats();
-            ApplyStatsToPlayer();
+            currentHp = MaxHp;
         }
 
-        // 최종 스탯 PlayerStats에서 직접 참조하여 반영
+     
+
+        void OnDisable()
+        {
+            playerStats.OnStatsChanged -= ApplyStatsToPlayer;
+        }
+
+        public float GetAttackPower()=>FinalAttack;
+        
+
         void ApplyStatsToPlayer()
         {
+            // HP 변화량만큼 currentHp 보정 (체력 증가 시 회복 포함)
             currentHp += (FinalHp - MaxHp);
             MaxHp = FinalHp;
+            if (currentHp > MaxHp) currentHp = MaxHp;
         }
 
-        public void AddExp(int amount)
-        {
-            exp += amount;
-            while (exp >= expToLevelUp)
-            {
-                exp -= expToLevelUp;
-                LevelUp();
-            }
-        }
-
-        void LevelUp()
-        {
-            level++;
-            expToLevelUp += 50;
-            baseHp += 5;
-            baseAttack += 1;
-            baseDefense += 1;
-
-            playerStats.RefreshStats();
-            ApplyStatsToPlayer();
-            currentHp = playerStats.FinalHp;
-        }
-
-        public void TakeDamage(int amount)
+        public void TakeDamage(float amount)
         {
             float damage = Mathf.Max(amount - playerStats.FinalDefense, 1);
             currentHp -= damage;
@@ -111,11 +88,17 @@ namespace IdleRPG
             isDead = true;
             animator.applyRootMotion = true;
             Invoke(nameof(OnDeath), 2f);
+            Invoke(nameof(spawn), 5f);
         }
         public void OnDeath()
         {
             gameObject.SetActive(false);
         }
+        public void spawn()
+        {
+            gameObject.SetActive(true);
+        }
+
 
         public void EnableWeaponCollider()
         {
@@ -124,15 +107,12 @@ namespace IdleRPG
 
         public void DisableWeaponCollider()
         {
+            isAttacking = false;
             if (weaponCollider) weaponCollider.enabled = false;
         }
 
+        // 스텟 직접 참조
+        
       
-        public float FinalAttack => playerStats.FinalAttack;
-        public float FinalAtkSpeed => playerStats.FinalAtkSpeed;
-        public float FinalHp => playerStats.FinalHp;
-        public float FinalDefense => playerStats.FinalDefense;
-        public float FinalCritRate => playerStats.FinalCritRate;
-        public float FinalCritDmg => playerStats.FinalCritDmg;
     }
 }

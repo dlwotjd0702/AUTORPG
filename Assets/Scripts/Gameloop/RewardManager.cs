@@ -1,28 +1,45 @@
 using IdleRPG;
 using UnityEngine;
-using UnityEngine.Serialization;
+using Inventory;
+using Stats;
 
 public class RewardManager : MonoBehaviour
 {
-    [FormerlySerializedAs("goldManager")] public UpgradeManager upgradeManager;
+    public UpgradeManager upgradeManager;
+    public InventorySystem inventorySystem;
     public GachaSystem gachaSystem;
 
     public void GrantReward(Player player, Monster monster)
     {
-        Debug.Log($"[RewardManager] GrantReward: Monster {monster.name} 보상 지급! EXP: {monster.expReward}, GOLD: {monster.goldReward}, 장비ID: {monster.equipmentDropId}, 스킬ID: {monster.skillDropId}");
-        // 경험치
-        player.AddExp(monster.expReward);
+        // 경험치, 골드
+        if (player && player.playerStats)
+            player.playerStats.AddExp(monster.expReward);
 
-        // 골드
-        upgradeManager.AddGold(monster.goldReward);
+        if (upgradeManager)
+            upgradeManager.AddGold(monster.goldReward);
 
-        // 장비/스킬 도감 해금 (확률/드롭 등)
-        /*if (!string.IsNullOrEmpty(monster.equipmentDropId))
-            gachaSystem.TryUnlockEquipment(monster.equipmentDropId);
+        // --- 아이템 드랍 판정 ---
+        if (gachaSystem != null && upgradeManager != null && inventorySystem != null)
+        {
+            int maxGrade = 20;
+            for (int grade = maxGrade; grade >= 1; grade--)
+            {
+                float dropChance = upgradeManager.GetDropChanceForGrade(grade);
+                if (Random.value < dropChance)
+                {
+                    string[] itemTypes = { "weapon", "armor", "ring", "skill" };
+                    string type = itemTypes[Random.Range(0, itemTypes.Length)];
+                    string itemId = $"{type}_{grade:D2}";
 
-        if (!string.IsNullOrEmpty(monster.skillDropId))
-            gachaSystem.TryUnlockSkill(monster.skillDropId);*/
+                    var data = inventorySystem.GetEquipmentData(itemId);
+                    if (data != null)
+                        inventorySystem.AddItem(data, 1);
 
-        // 추가 보상 등 확장 가능
+                    // 필요시 시각적 이펙트/팝업 등 처리
+                    Debug.Log($"[드랍] {itemId} 획득!");
+                    break; // 한 번만 드랍
+                }
+            }
+        }
     }
 }

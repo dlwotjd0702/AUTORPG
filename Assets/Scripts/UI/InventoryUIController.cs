@@ -47,11 +47,15 @@ namespace Inventory
             InitSlotPool(accessoryContent, accessorySlots, inventory.GetAllOfType(ItemType.Accessory).Count, OnAccessorySlotClicked);
             InitSlotPool(skillContent, skillSlots, inventory.GetAllOfType(ItemType.Skill).Count, OnSkillSlotClicked);
 
-            inventory.AddItemById("weapon_01", 1);
 
             ShowPanel(ItemType.Weapon); // 무기부터 보이게
             inventory.OnInventoryChanged += () => ShowPanel(currentPanelType);
            
+        }
+
+        private void OnEnable()
+        {
+            ShowPanel(currentPanelType);
         }
 
         void InitSlotPool(Transform parent, List<GameObject> pool, int count, Action<string> onClickFunc)
@@ -157,5 +161,14 @@ namespace Inventory
             inventory.AddItemById("ring_01", 1);
             inventory.AddItemById("skill_01", 1);
         }
+        public void OnCloseButton()
+        {
+            gameObject.SetActive(false);
+        }
+        public void OnOpenButton()
+        {
+            gameObject.SetActive(true);
+        }
     }
+    
 }

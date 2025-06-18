@@ -1,15 +1,16 @@
 using UnityEngine;
 using System;
+using Combat;
 
 namespace IdleRPG
 {
     [DefaultExecutionOrder(100)]
-    public class Monster : MonoBehaviour, IDamageable
+    public class Monster : MonoBehaviour, IDamageable,IAttackStat
     {
         public float moveSpeed = 3f;
         public float attackRange = 1.5f;
         public float attackCooldown = 1.2f;
-        public int maxHp = 5;
+        public float maxHp = 5;
         public int expReward = 10;
         public int goldReward = 20;
         public string equipmentDropId;
@@ -18,12 +19,14 @@ namespace IdleRPG
         public Animator animator;
         public Collider weaponCollider; // 몬스터가 무기 콜라이더 갖는 경우
 
-        [HideInInspector] public int currentHp;
+        public float currentHp;
         [HideInInspector] public bool isAttacking = false;
         [HideInInspector] public bool isMoving = false;
         [HideInInspector] public GameObject target;
         public bool isDead;
 
+        public float attackPower = 5f; // 또는 계산된 값
+        public float GetAttackPower() => attackPower;
         // ⭐️ 이벤트 선언 (풀링/스테이지 매니저에서 구독)
         public event Action<Monster> OnMonsterDeath;
 
@@ -48,8 +51,9 @@ namespace IdleRPG
             SceneLinkedSMB<Monster>.Initialise(animator, this);
         }
 
-        public void TakeDamage(int amount)
+        public void TakeDamage(float amount)
         {
+            Debug.Log($"{amount}TakeDamage");
             currentHp -= amount;
             if (currentHp <= 0)
             {

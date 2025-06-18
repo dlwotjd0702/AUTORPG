@@ -12,7 +12,8 @@ public class MonsterPool : MonoBehaviour
         Monster monster = pool.Find(m => !m.gameObject.activeInHierarchy);
         if (monster == null)
         {
-            monster = Instantiate(monsterPrefab).GetComponent<Monster>();
+            monster = Instantiate(monsterPrefab, gameObject.transform).GetComponent<Monster>();
+            pool.Add(monster);
             pool.Add(monster);
         }
         monster.currentHp = monster.maxHp;

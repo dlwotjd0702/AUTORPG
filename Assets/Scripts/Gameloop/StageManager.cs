@@ -10,7 +10,7 @@ public class StageManager : MonoBehaviour
 
     public int currentStage = 1;
     public int currentWave = 1;
-    public int monstersPerWave = 5;
+    public int monstersPerWave = 8;
     public float spawnInterval = 1.5f;
 
     private int monstersAlive;
@@ -26,15 +26,30 @@ public class StageManager : MonoBehaviour
         float spawnRadius = 3.0f; // 플레이어로부터 거리
         Vector3 playerPos = player.transform.position;
 
+        // 강화 배율, 난이도에 따라 수정
+        float hpMultiplier = 1f + (currentWave - 1) * 0.2f; // 20%씩 증가
+        float goldMultiplier = 1f + (currentWave - 1) * 0.15f; // 15%씩 증가
+        float expMultiplier = 1f + (currentWave - 1) * 0.1f; // 10%씩 증가
+        float attackMultiplier = 1f + (currentWave - 1) * 0.1f; // 10%씩 증가
+
         for (int i = 0; i < monstersPerWave; i++)
         {
-            // 원주상에 등간격 배치
             float angle = i * Mathf.PI * 2 / monstersPerWave;
             Vector3 offset = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * spawnRadius;
             Vector3 spawnPos = playerPos + offset;
 
             Monster monster = monsterPool.Spawn();
             monster.transform.position = spawnPos;
+
+            // --- [여기서 스탯 강화 적용] ---
+            float baseHp = monster.maxHp; // 원본
+            monster.maxHp = Mathf.RoundToInt(baseHp * hpMultiplier);
+            monster.currentHp = monster.maxHp;
+            monster.goldReward = Mathf.RoundToInt(monster.goldReward * goldMultiplier);
+            monster.expReward = Mathf.RoundToInt(monster.expReward * expMultiplier);
+            monster.attackPower = Mathf.RoundToInt(monster.attackPower * attackMultiplier);
+            // 공격력, 공격속도 등 다른 수치도 여기에 추가 가능
+
             monster.OnMonsterDeath += OnMonsterDeath;
             monstersAlive++;
         }
