@@ -6,12 +6,13 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using System.Globalization;
 using System.Linq;
+using Combat;
 
 namespace Inventory
 {
     [DefaultExecutionOrder(-100)]
     [System.Serializable]
-    public class InventorySystem : MonoBehaviour
+    public class InventorySystem : MonoBehaviour, ISaveable
     {
         public int slotCount = 100;
         public Item[] slots;
@@ -40,6 +41,15 @@ namespace Inventory
             dataDict.Clear();
             foreach (var data in dataList)
                 dataDict[data.id] = data;
+        }
+
+        private void Start()
+        {
+            
+                var save = SaveManager.pendingSaveData;
+                if (save != null)
+                    ApplyLoadedData(save);
+
         }
 
         public List<EquipmentData> LoadFromTSVWithCsvHelper(string path)
@@ -342,7 +352,61 @@ namespace Inventory
             // Combine 로직: TryCombine 또는 맞는 함수 호출
             TryCombine(skillId, 2);
         }
+        public void ForceRefresh()
+        {
+            OnInventoryChanged?.Invoke();
+        }
         
+        public void ApplyLoadedData(SaveData data)
+        {
+            if (data == null) return;
+
+            // 기존 인벤토리 초기화
+            for (int i = 0; i < slots.Length; i++)
+                slots[i].Clear();
+
+            // 저장된 인벤토리 복원
+            if (data.inventorySlots != null)
+            {
+                foreach (var slotData in data.inventorySlots)
+                {
+                    var eqData = GetEquipmentData(slotData.id);
+                    if (eqData != null)
+                    {
+                        AddItem(eqData, slotData.count);
+                        var slot = GetOwnedSlotById(slotData.id);
+                        if (slot != null)
+                        {
+                            slot.level = slotData.level;
+                            slot.awakenLevel = slotData.awakenLevel;
+                            slot.isOwned = slotData.isOwned;
+                            slot.isEquipped = slotData.isEquipped;
+                        }
+                    }
+                }
+            }
+            OnInventoryChanged?.Invoke();
+        }
+
+        public void CollectSaveData(SaveData data)
+        {
+            data.inventorySlots = new List<InventorySlotSave>();
+            foreach (var slot in slots)
+            {
+                if (slot != null && slot.itemData != null)
+                {
+                    data.inventorySlots.Add(new InventorySlotSave
+                    {
+                        id = slot.itemData.id,
+                        count = slot.count,
+                        level = slot.level,
+                        awakenLevel = slot.awakenLevel,
+                        isOwned = slot.isOwned,
+                        isEquipped = slot.isEquipped
+                    });
+                }
+            }
+        }
         
     }
 }

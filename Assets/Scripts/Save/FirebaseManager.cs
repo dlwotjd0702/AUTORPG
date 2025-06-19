@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Firebase;
 using Firebase.Auth;
 using Firebase.Extensions;
@@ -22,7 +21,6 @@ public class FirebaseManager : MonoBehaviour
 
     private void Awake()
     {
-        User = null;
         if (Instance && Instance != this)
         {
             Destroy(gameObject);
@@ -103,7 +101,6 @@ public class FirebaseManager : MonoBehaviour
     #endregion
 
     #region --------- Save/Load ---------
-    // 저장 (Firestore)
     public void SaveGame(SaveData saveData, Action<bool> callback = null)
     {
         if (User == null)
@@ -129,7 +126,6 @@ public class FirebaseManager : MonoBehaviour
         });
     }
 
-    // 불러오기 (Firestore)
     public void LoadGame(Action<SaveData> onLoaded)
     {
         if (User == null)

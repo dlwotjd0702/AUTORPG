@@ -15,7 +15,7 @@ namespace IdleRPG
         public int goldReward = 20;
         public string equipmentDropId;
         public string skillDropId;
-
+        public int prefabIndex = 0;
         public Animator animator;
         public Collider weaponCollider; // 몬스터가 무기 콜라이더 갖는 경우
 

@@ -1618,8 +1618,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab8cdcaca7b4cab8a12825e2ebca69d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  monsterPrefab: {fileID: 8550342286580672755, guid: 81c3b419e6b7b1543b5a34d92c31995c, type: 3}
-  pool: []
+  monsterPrefabs:
+  - {fileID: 8550342286580672755, guid: 81c3b419e6b7b1543b5a34d92c31995c, type: 3}
+  - {fileID: 8550342286580672755, guid: 81c3b419e6b7b1543b5a34d92c31995c, type: 3}
+  - {fileID: 8550342286580672755, guid: 81c3b419e6b7b1543b5a34d92c31995c, type: 3}
+  - {fileID: 8550342286580672755, guid: 81c3b419e6b7b1543b5a34d92c31995c, type: 3}
+  - {fileID: 8550342286580672755, guid: 81c3b419e6b7b1543b5a34d92c31995c, type: 3}
 --- !u!4 &369049830
 Transform:
   m_ObjectHideFlags: 0
@@ -2280,7 +2284,17 @@ MonoBehaviour:
   currentStage: 1
   currentWave: 1
   monstersPerWave: 5
-  spawnInterval: 3
+  maxStage: 10
+  maxWavePerStage: 10
+  maxClearedStage: 1
+  maxClearedWave: 1
+  clearedStageWave: []
+  progressMode: 1
+  stagePatterns: []
+  nextWaveButton: {fileID: 0}
+  prevWaveButton: {fileID: 0}
+  toggleModeButton: {fileID: 0}
+  progressModeText: {fileID: 0}
 --- !u!4 &632207144
 Transform:
   m_ObjectHideFlags: 0

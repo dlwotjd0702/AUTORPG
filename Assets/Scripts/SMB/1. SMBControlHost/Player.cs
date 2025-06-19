@@ -92,6 +92,9 @@ namespace IdleRPG
         }
         public void OnDeath()
         {
+            var stageManager = FindObjectOfType<StageManager>();
+            if (stageManager != null)
+                stageManager.OnPlayerDied();
             gameObject.SetActive(false);
         }
         public void spawn()
@@ -111,7 +114,6 @@ namespace IdleRPG
             if (weaponCollider) weaponCollider.enabled = false;
         }
 
-        // 스텟 직접 참조
         
       
     }

@@ -1,9 +1,10 @@
 using System;
+using Combat;
 using UnityEngine;
 
 namespace Stats
 {
-    public class UpgradeManager : MonoBehaviour
+    public class UpgradeManager : MonoBehaviour, ISaveable
     {
         [Header("골드 및 연동")]
         public int gold = 0;
@@ -30,7 +31,7 @@ namespace Stats
         [Header("드랍률 업그레이드")]
         [SerializeField] public float baseDropRate = 0.2f;    // 20% 기본
         [SerializeField] public float penaltyPerGrade = 0.05f; // 등급당 -5%
-        [SerializeField] private int dropRateUpgradeLevel = 0; // 전체 드랍률 업
+        [SerializeField] public int dropRateUpgradeLevel = 0; // 전체 드랍률 업
         public event Action OnGoldChanged = delegate { };
 
         // 비용 계산
@@ -46,7 +47,12 @@ namespace Stats
         public int GetCritDmgUpgradeCost()   => CalcUpgradeCost(critDmgUpgradeCost, critDmgUpgradeLevel);
 
    
-
+        void Start()
+        {
+            var save = SaveManager.pendingSaveData;
+            if (save != null)
+                ApplyLoadedData(save);
+        }
         public int GetDropRateUpgradeCost()
         {
             // 드랍률 업그레이드 비용 (예시 공식)
@@ -146,6 +152,31 @@ namespace Stats
             OnGoldChanged.Invoke();
             Debug.Log($"[UpgradeManager] 골드 획득: {amount} (현재 GOLD: {gold})");
 
+        }
+        
+        public void ApplyLoadedData(SaveData data)
+        {
+            if (data == null) return;
+            gold = data.gold;
+            atkUpgradeLevel = data.atkUpgradeLevel;
+            defUpgradeLevel = data.defUpgradeLevel;
+            hpUpgradeLevel = data.hpUpgradeLevel;
+            atkSpdUpgradeLevel = data.atkSpdUpgradeLevel;
+            critRateUpgradeLevel = data.critRateUpgradeLevel;
+            critDmgUpgradeLevel = data.critDmgUpgradeLevel;
+            dropRateUpgradeLevel = data.dropRateUpgradeLevel;
+        }
+
+        public void CollectSaveData(SaveData data)
+        {
+            data.gold = gold;
+            data.atkUpgradeLevel = atkUpgradeLevel;
+            data.defUpgradeLevel = defUpgradeLevel;
+            data.hpUpgradeLevel = hpUpgradeLevel;
+            data.atkSpdUpgradeLevel = atkSpdUpgradeLevel;
+            data.critRateUpgradeLevel = critRateUpgradeLevel;
+            data.critDmgUpgradeLevel = critDmgUpgradeLevel;
+            data.dropRateUpgradeLevel = dropRateUpgradeLevel;
         }
     }
 }

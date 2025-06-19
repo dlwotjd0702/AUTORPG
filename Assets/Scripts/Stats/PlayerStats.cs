@@ -1,10 +1,11 @@
 using System;
+using Combat;
 using Inventory;
 using UnityEngine;
 
 namespace Stats
 {
-    public class PlayerStats : MonoBehaviour
+    public class PlayerStats : MonoBehaviour,ISaveable
     {
         [Header("연동 시스템")]
         public InventorySystem inventory;
@@ -39,6 +40,9 @@ namespace Stats
 
         private void Start()
         {
+            var save = SaveManager.pendingSaveData;
+            if (save != null)
+                ApplyLoadedData(save);
             inventory.OnInventoryChanged += RefreshStats;
         }
 
@@ -113,6 +117,21 @@ namespace Stats
             FinalCritDmg = baseCritDmg * critDmgMul;
 
             OnStatsChanged?.Invoke();
+        }
+        public void ApplyLoadedData(SaveData data)
+        {
+            if (data == null) return;
+            level = data.level;
+            exp = data.exp;
+            expToLevelUp = data.expToLevelUp;
+            // baseAttack, baseHp, baseDefense 등 필요시 data에서 추가
+        }
+        public void CollectSaveData(SaveData data)
+        {
+            data.level = level;
+            data.exp = exp;
+            data.expToLevelUp = expToLevelUp;
+            // baseAttack, baseHp, baseDefense 등 필요시 data에 추가
         }
 
         // ----------- 이벤트들 -------------
