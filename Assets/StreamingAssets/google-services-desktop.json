@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1088076682",
+    "project_id": "autorpg-1fa21",
+    "storage_bucket": "autorpg-1fa21.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1088076682:android:58fae0514b91c23c242673",
+        "android_client_info": {
+          "package_name": "com.MaybeSoft.AUTORPG"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1088076682-7ch1fbpeffd5qkrgurmrvm3llgg1e3le.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAa3PWk01wEb5f13Yv87Gu54YZ59V-TC6g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1088076682-7ch1fbpeffd5qkrgurmrvm3llgg1e3le.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
