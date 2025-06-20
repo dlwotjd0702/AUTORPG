@@ -37,6 +37,8 @@ public class SaveManager : MonoBehaviour
     public void SaveGame()
     {
         SaveData data = new SaveData();
+        data.SetSaveTime();
+        data.nickname = FirebaseManager.Instance.Email.Split('@')[0];
         foreach (var s in FindObjectsOfType<MonoBehaviour>().OfType<ISaveable>())
             s.CollectSaveData(data);
 

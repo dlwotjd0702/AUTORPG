@@ -7,6 +7,7 @@ using CsvHelper.Configuration;
 using System.Globalization;
 using System.Linq;
 using Combat;
+using UnityEngine.Networking;
 
 namespace Inventory
 {
@@ -55,29 +56,53 @@ namespace Inventory
         public List<EquipmentData> LoadFromTSVWithCsvHelper(string path)
         {
             var list = new List<EquipmentData>();
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture);
+           
+            string tsvText = null;
+            UnityWebRequest www = UnityWebRequest.Get(path);
+            var request = www.SendWebRequest();
+            while (!request.isDone) { } 
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError("TSV 파일 읽기 실패 (Android): " + www.error);
+                return list;
+            }
+            tsvText = www.downloadHandler.text;
+            using (var reader = new StringReader(tsvText))
+            {
+                config = new CsvConfiguration(CultureInfo.InvariantCulture)
+                {
+                    Delimiter = "\t",
+                    HasHeaderRecord = true,
+                    MissingFieldFound = null,
+                    IgnoreBlankLines = true,
+                    TrimOptions = TrimOptions.Trim,
+                    ShouldSkipRecord = args => args.Row.Parser.Record.All(string.IsNullOrWhiteSpace)
+                };
+                using (var csv = new CsvReader(reader, config))
+                {
+                    list = new List<EquipmentData>(csv.GetRecords<EquipmentData>());
+                }
+            }
+
+            // Windows 및 에디터 환경에서는 File.ReadAllText 사용
             if (!File.Exists(path))
             {
                 Debug.LogError("TSV 파일이 존재하지 않습니다: " + path);
                 return list;
             }
 
-            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                Delimiter = "\t",
-                HasHeaderRecord = true,
-                MissingFieldFound = null,
-                IgnoreBlankLines = true,
-                TrimOptions = TrimOptions.Trim,
-                ShouldSkipRecord = args => args.Row.Parser.Record.All(string.IsNullOrWhiteSpace)
-            };
+           
 
             using (var reader = new StreamReader(path))
             using (var csv = new CsvReader(reader, config))
             {
                 list = new List<EquipmentData>(csv.GetRecords<EquipmentData>());
             }
+
             return list;
         }
+
         
 
         public EquipmentData GetEquipmentData(string id)

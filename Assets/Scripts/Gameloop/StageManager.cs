@@ -27,7 +27,7 @@ public class StageManager : MonoBehaviour, ISaveable
     public StageProgressMode progressMode = StageProgressMode.Advance;
 
     private int monstersAlive;
-
+    
     [System.Serializable]
     public class StageMonsterPattern
     {
@@ -64,11 +64,13 @@ public class StageManager : MonoBehaviour, ISaveable
         var pattern = stagePatterns.Find(p => p.stage == currentStage);
         int[] spawnTypes = pattern != null ? pattern.prefabIndices : new int[] { 0 };
 
-        int absoluteWave = (currentStage - 1) * maxWavePerStage + currentWave;
-        float hpMultiplier     = 1f + (absoluteWave - 1) * 0.2f;
-        float goldMultiplier   = 1f + (absoluteWave - 1) * 0.15f;
-        float expMultiplier    = 1f + (absoluteWave - 1) * 0.1f;
-        float attackMultiplier = 1f + (absoluteWave - 1) * 0.1f;
+        int relativeWave = currentWave;
+        int relativeStage = currentStage;
+
+        float hpMultiplier     = 1f + (relativeStage - 1) * 0.5f + (relativeWave - 1) * 0.2f;
+        float goldMultiplier   = 1f + (relativeStage - 1) * 0.3f + (relativeWave - 1) * 0.1f;
+        float expMultiplier    = 1f + (relativeStage - 1) * 0.15f + (relativeWave - 1) * 0.05f;
+        float attackMultiplier = 1f + (relativeStage - 1) * 0.2f + (relativeWave - 1) * 0.1f;
 
         for (int i = 0; i < monstersPerWave; i++)
         {
@@ -81,8 +83,8 @@ public class StageManager : MonoBehaviour, ISaveable
             Monster monster = monsterPool.Spawn(prefabIdx);
             monster.transform.position = spawnPos;
 
+            // 능력치 곱연산만 적용 (currentHp는 OnEnable에서 처리)
             monster.maxHp      = Mathf.RoundToInt(monster.maxHp * hpMultiplier);
-            monster.currentHp  = monster.maxHp;
             monster.goldReward = Mathf.RoundToInt(monster.goldReward * goldMultiplier);
             monster.expReward  = Mathf.RoundToInt(monster.expReward * expMultiplier);
             monster.attackPower= Mathf.RoundToInt(monster.attackPower * attackMultiplier);
@@ -90,6 +92,8 @@ public class StageManager : MonoBehaviour, ISaveable
             monster.OnMonsterDeath += OnMonsterDeath;
             monstersAlive++;
         }
+
+        UpdateProgressModeText(); // 웨이브 시작마다 항상 UI 갱신
     }
 
     private void OnMonsterDeath(Monster monster)
@@ -126,10 +130,11 @@ public class StageManager : MonoBehaviour, ISaveable
         UpdateProgressModeText();
     }
 
+    // --------- UI 갱신(웨이브 시작마다 호출됨) ---------
     private void UpdateProgressModeText()
     {
         if (progressModeText)
-            progressModeText.text = progressMode == StageProgressMode.Advance ? "모드: 돌파" : "모드: 반복";
+            progressModeText.text = $"{currentStage} 스테이지 {currentWave}/10 Wave \n모드: {(progressMode == StageProgressMode.Advance ? "돌파" : "반복")}";
     }
 
     // --------- 플레이어 죽음 시 처리 ---------
@@ -144,21 +149,41 @@ public class StageManager : MonoBehaviour, ISaveable
             currentStage--;
             currentWave = maxWavePerStage;
         }
+        else
+        {
+            currentStage = 1;
+            currentWave = 1;
+            return; // 더 이상 내릴 수 없음
+        }
         StartWave();
     }
 
     public void NextWave()
     {
+        int nextWave = currentWave;
+        int nextStage = currentStage;
+
         if (currentWave >= maxWavePerStage)
         {
-            currentWave = 1;
-            currentStage++;
-            if (currentStage > maxStage) currentStage = maxStage;
+            nextWave = 1;
+            nextStage++;
+            if (nextStage > maxStage) nextStage = maxStage;
         }
         else
         {
-            currentWave++;
+            nextWave++;
         }
+
+        // Advance 모드에서만 미클리어 웨이브 제한
+        if (progressMode == StageProgressMode.Advance &&
+            !clearedStageWave.Any(x => x.stage == nextStage && x.wave == nextWave))
+        {
+            Debug.Log("아직 클리어하지 않은 웨이브입니다.");
+            return;
+        }
+
+        currentStage = nextStage;
+        currentWave = nextWave;
         StartWave();
     }
 
@@ -172,6 +197,13 @@ public class StageManager : MonoBehaviour, ISaveable
         {
             currentStage--;
             currentWave = maxWavePerStage;
+        }
+        else
+        {
+            currentStage = 1;
+            currentWave = 1;
+            Debug.Log("최저 웨이브/스테이지입니다.");
+            return; // 더 이상 내릴 수 없음
         }
         StartWave();
     }

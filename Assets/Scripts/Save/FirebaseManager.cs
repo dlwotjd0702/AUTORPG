@@ -18,6 +18,7 @@ public class FirebaseManager : MonoBehaviour
     private const string SaveDataDocPrefix = "User_";
 
     public bool IsReady { get; private set; } = false;
+    public string Email { get; private set; }
 
     private void Awake()
     {
@@ -55,6 +56,7 @@ public class FirebaseManager : MonoBehaviour
     {
         Auth.SignInWithEmailAndPasswordAsync(email, password).ContinueWithOnMainThread(task =>
         {
+            Email = email;
             if (task.IsCanceled || task.IsFaulted)
             {
                 Debug.LogError("Firebase 로그인 실패: " + task.Exception);
@@ -87,6 +89,7 @@ public class FirebaseManager : MonoBehaviour
     {
         Auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(task =>
         {
+            Email = User.UserId;
             if (task.IsCanceled || task.IsFaulted)
             {
                 Debug.LogError("Firebase 익명 로그인 실패: " + task.Exception);

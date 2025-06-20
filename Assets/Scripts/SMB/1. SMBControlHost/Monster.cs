@@ -40,6 +40,7 @@ namespace IdleRPG
         {
             animator.applyRootMotion = false;
             isDead=false;
+            currentHp = maxHp;
             if (animator == null)
                 animator = GetComponent<Animator>();
 

@@ -1,49 +1,58 @@
+using Firebase.Firestore;
 using System;
 using System.Collections.Generic;
 
-[Serializable]
+[FirestoreData]
 public class SaveData
 {
-    // Player, Upgrade 등
-    public int level;
-    public int exp;
-    public int expToLevelUp;
+    [FirestoreProperty] public int level { get; set; }
+    [FirestoreProperty] public int exp { get; set; }
+    [FirestoreProperty] public int expToLevelUp { get; set; }
 
-    public int gold;
-    public int atkUpgradeLevel;
-    public int defUpgradeLevel;
-    public int hpUpgradeLevel;
-    public int atkSpdUpgradeLevel;
-    public int critRateUpgradeLevel;
-    public int critDmgUpgradeLevel;
-    public int dropRateUpgradeLevel;
+    [FirestoreProperty] public int gold { get; set; }
+    [FirestoreProperty] public int atkUpgradeLevel { get; set; }
+    [FirestoreProperty] public int defUpgradeLevel { get; set; }
+    [FirestoreProperty] public int hpUpgradeLevel { get; set; }
+    [FirestoreProperty] public int atkSpdUpgradeLevel { get; set; }
+    [FirestoreProperty] public int critRateUpgradeLevel { get; set; }
+    [FirestoreProperty] public int critDmgUpgradeLevel { get; set; }
+    [FirestoreProperty] public int dropRateUpgradeLevel { get; set; }
 
     // 웨이브/스테이지 정보
-    public int currentStage;
-    public int currentWave;
-    public int maxClearedStage;
-    public int maxClearedWave;
-    public List<StageWaveRecord> clearedStageWave = new List<StageWaveRecord>();
-    public int progressMode; // 0: Repeat, 1: Advance
+    [FirestoreProperty] public int currentStage { get; set; }
+    [FirestoreProperty] public int currentWave { get; set; }
+    [FirestoreProperty] public int maxClearedStage { get; set; }
+    [FirestoreProperty] public int maxClearedWave { get; set; }
+    [FirestoreProperty] public List<StageWaveRecord> clearedStageWave { get; set; } = new List<StageWaveRecord>();
+    [FirestoreProperty] public int progressMode { get; set; } // 0: Repeat, 1: Advance
 
     // 인벤토리
-    public List<InventorySlotSave> inventorySlots = new List<InventorySlotSave>();
+    [FirestoreProperty] public List<InventorySlotSave> inventorySlots { get; set; } = new List<InventorySlotSave>();
+
+    [FirestoreProperty] public string savedAt { get; set; }
+    [FirestoreProperty] public string nickname { get; set; }
+
+    // 저장 시점 기록 (이 메서드는 그대로 사용 가능)
+    public void SetSaveTime()
+    {
+        savedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+    }
 }
 
-[Serializable]
+[FirestoreData]
 public class StageWaveRecord
 {
-    public int stage;
-    public int wave;
+    [FirestoreProperty] public int stage { get; set; }
+    [FirestoreProperty] public int wave { get; set; }
 }
 
-[Serializable]
+[FirestoreData]
 public class InventorySlotSave
 {
-    public string id;
-    public int count;
-    public int level;
-    public int awakenLevel;
-    public bool isOwned;
-    public bool isEquipped;
+    [FirestoreProperty] public string id { get; set; }
+    [FirestoreProperty] public int count { get; set; }
+    [FirestoreProperty] public int level { get; set; }
+    [FirestoreProperty] public int awakenLevel { get; set; }
+    [FirestoreProperty] public bool isOwned { get; set; }
+    [FirestoreProperty] public bool isEquipped { get; set; }
 }
