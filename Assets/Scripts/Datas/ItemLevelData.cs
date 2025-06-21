@@ -1,7 +1,4 @@
-using UnityEngine;
 
-namespace Inventory
-{
     [System.Serializable]
     public class Item // = InventorySlot
     {
@@ -83,4 +80,4 @@ namespace Inventory
             return s.Trim();
         }
     }
-}
+

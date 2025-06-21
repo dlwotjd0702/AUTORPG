@@ -1,20 +1,17 @@
 using UnityEngine;
-
-namespace Inventory
+public enum ItemType
 {
-    public enum ItemType
-    {
-        Weapon,
-        Armor,
-        Accessory,
-        Skill
-    }
-
-    public enum SkillType
-    {
-        Active,
-        Passive
-    }
+    Weapon,
+    Armor,
+    Accessory,
+    Skill
+}
+public enum SkillType
+{
+    Active,
+    Passive
+}
+    
 
     [System.Serializable]
     public class EquipmentData
@@ -71,7 +68,7 @@ namespace Inventory
         public int SkillPower => skillPower ?? 0;
         public int MaxLevel => maxLevel ?? 0;
     }
-}
+
 
     
     

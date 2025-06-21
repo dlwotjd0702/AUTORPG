@@ -1,100 +1,99 @@
-using UnityEngine;
-using Inventory;
-using TMPro; // TextMeshPro
-using UnityEngine.UI;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 public class GachaSystem : MonoBehaviour
 {
-    public InventorySystem inventorySystem;
-
-    // UI
-    public GameObject popupPanel;
-    public TMP_Text popupItemNameText;
-    public Image popupItemIcon;
-
     public int maxGrade = 20;
-    public float baseGachaRate = 0.6f;       // 가챠 기본 등급확률
-    public float penaltyPerGrade = 0.05f;    // 등급당 하락
-    public string[] typePrefixes = { "weapon", "armor", "ring", "skill" };
+    public Dictionary<ItemType, GachaLevelInfo> gachaLevels = new();
 
-    // 등급판정(가챠 전용)
-    public int RollGradeForGacha()
+    void Awake()
     {
-        for (int grade = maxGrade; grade >= 1; grade--)
+        // 모든 타입별 가챠 레벨 정보 초기화
+        foreach (ItemType type in Enum.GetValues(typeof(ItemType)))
         {
-            float chance = Mathf.Max(baseGachaRate - penaltyPerGrade * (grade - 1), 0f);
-            if (Random.value < chance)
-                return grade;
-        }
-        return 1; // 실패시 최소 1등급
-    }
-
-    // 실제 뽑기 (등급, 타입)
-    public string RollItemIdGacha()
-    {
-        string type = typePrefixes[Random.Range(0, typePrefixes.Length)];
-        int grade = RollGradeForGacha();
-        return $"{type}_{grade:D2}";
-    }
-
-    // 1회 뽑기 (UI, 인벤토리 처리)
-    public void RollGachaAndShowPopup()
-    {
-        string itemId = RollItemIdGacha();
-        var data = inventorySystem.GetEquipmentData(itemId);
-        if (data != null)
-        {
-            inventorySystem.AddItem(data, 1);
-            ShowPopupPanel(data);
-        }
-        else
-        {
-            ShowPopupPanel(null);
+            gachaLevels[type] = new GachaLevelInfo();
+            UpdateGradeRates(type);
         }
     }
 
-    // 10회 뽑기 (모두 인벤토리 추가, 결과 반환)
-    public List<EquipmentData> RollGacha10()
+    public void RollGacha(ItemType type, int count)
     {
-        List<EquipmentData> results = new List<EquipmentData>();
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < count; i++)
         {
-            string itemId = RollItemIdGacha();
-            var data = inventorySystem.GetEquipmentData(itemId);
-            if (data != null)
+            int grade = RollGradeForGacha(type);
+            string itemId = $"{type.ToString().ToLower()}_{grade:D2}";
+            // 인벤토리 등 추가처리...
+            // inventorySystem.AddItem(data, 1);
+            // ...
+            // 가챠 횟수 및 레벨업 처리
+            var info = gachaLevels[type];
+            info.rolls++;
+            if (info.rolls >= GetLevelUpThreshold(info.level))
             {
-                inventorySystem.AddItem(data, 1);
-                results.Add(data);
+                info.level++;
+                info.rolls = 0;
+                UpdateGradeRates(type);
             }
         }
-        // 10회 뽑기 UI(리스트 표시 등)는 별도 구현
-        return results;
     }
 
-    // 팝업
-    public void ShowPopupPanel(EquipmentData data)
+    public int RollGradeForGacha(ItemType type)
     {
-        if (!popupPanel) return;
-        popupPanel.SetActive(true);
-
-        if (data != null)
+        var rates = gachaLevels[type].gradeRates;
+        float rand = UnityEngine.Random.value;
+        float acc = 0f;
+        foreach (var kvp in rates.OrderByDescending(k => k.Key))
         {
-            popupItemNameText.text = data.name;
-            popupItemIcon.sprite = inventorySystem.GetIcon(data.id);
-            popupItemIcon.enabled = true;
+            acc += kvp.Value;
+            if (rand < acc)
+                return kvp.Key;
         }
-        else
-        {
-            popupItemNameText.text = "아이템 없음!";
-            popupItemIcon.enabled = false;
-        }
-
-        CancelInvoke(nameof(HidePopupPanel));
-        Invoke(nameof(HidePopupPanel), 2f);
+        return 1;
     }
-    public void HidePopupPanel()
+
+    // 등급별 드랍률 표기용
+    public string GetDropRateString(ItemType type)
     {
-        if (popupPanel) popupPanel.SetActive(false);
+        var rates = gachaLevels[type].gradeRates;
+        return string.Join("\n", rates.OrderByDescending(k => k.Key)
+            .Select(kvp => $"{kvp.Key}등급: {(kvp.Value * 100f):0.###}%"));
+    }
+
+    // 레벨업 기준 (예시)
+    int GetLevelUpThreshold(int level)
+    {
+        // 예: 10회 → 레벨1, 20회 → 레벨2, 40회 → 레벨3, ...
+        return 10 * (int)Mathf.Pow(2, level - 1);
+    }
+
+    // 가챠 레벨에 따라 드랍률 재계산
+    void UpdateGradeRates(ItemType type)
+    {
+        var info = gachaLevels[type];
+        int level = info.level;
+        float baseRate = 0.5f;
+        Dictionary<int, float> rates = new();
+
+        float sum = 0f;
+        for (int grade = 1; grade <= maxGrade; grade++)
+        {
+            float rate = baseRate / Mathf.Pow(2, grade - 1);
+
+            // 등급별 가챠레벨 보너스(예시, 고등급일수록 더 크게 증가)
+            if (grade > 1)
+            {
+                // 레벨이 오를 때마다 1등급에서 각 고등급으로 (등급-1)*level*0.002 보정치 분배
+                rate += (grade - 1) * level * 0.002f;
+            }
+            rates[grade] = rate;
+            sum += rate;
+        }
+        // 전체를 1(100%)로 정규화
+        foreach (var key in rates.Keys.ToList())
+            rates[key] /= sum;
+
+        info.gradeRates = rates;
     }
 }
