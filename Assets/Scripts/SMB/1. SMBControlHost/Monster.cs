@@ -54,7 +54,7 @@ namespace IdleRPG
 
         public void TakeDamage(float amount)
         {
-            Debug.Log($"{amount}TakeDamage");
+//            Debug.Log($"{amount}TakeDamage");
             currentHp -= amount;
             if (currentHp <= 0)
             {

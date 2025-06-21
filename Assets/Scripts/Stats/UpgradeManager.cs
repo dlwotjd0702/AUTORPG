@@ -150,7 +150,7 @@ namespace Stats
         {
             gold += amount;
             OnGoldChanged.Invoke();
-            Debug.Log($"[UpgradeManager] 골드 획득: {amount} (현재 GOLD: {gold})");
+//            Debug.Log($"[UpgradeManager] 골드 획득: {amount} (현재 GOLD: {gold})");
 
         }
         

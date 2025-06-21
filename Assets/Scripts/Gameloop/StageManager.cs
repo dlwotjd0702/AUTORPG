@@ -27,7 +27,7 @@ public class StageManager : MonoBehaviour, ISaveable
     public StageProgressMode progressMode = StageProgressMode.Advance;
 
     private int monstersAlive;
-    
+
     [System.Serializable]
     public class StageMonsterPattern
     {
@@ -83,7 +83,6 @@ public class StageManager : MonoBehaviour, ISaveable
             Monster monster = monsterPool.Spawn(prefabIdx);
             monster.transform.position = spawnPos;
 
-            // 능력치 곱연산만 적용 (currentHp는 OnEnable에서 처리)
             monster.maxHp      = Mathf.RoundToInt(monster.maxHp * hpMultiplier);
             monster.goldReward = Mathf.RoundToInt(monster.goldReward * goldMultiplier);
             monster.expReward  = Mathf.RoundToInt(monster.expReward * expMultiplier);
@@ -174,12 +173,16 @@ public class StageManager : MonoBehaviour, ISaveable
             nextWave++;
         }
 
-        // Advance 모드에서만 미클리어 웨이브 제한
-        if (progressMode == StageProgressMode.Advance &&
-            !clearedStageWave.Any(x => x.stage == nextStage && x.wave == nextWave))
+        // Advance 모드에서는 이전 웨이브를 클리어한 경우에만 다음으로 진행
+        if (progressMode == StageProgressMode.Advance)
         {
-            Debug.Log("아직 클리어하지 않은 웨이브입니다.");
-            return;
+            bool isPreviousCleared = clearedStageWave.Any(x => x.stage == currentStage && x.wave == currentWave);
+
+            if (!isPreviousCleared)
+            {
+                Debug.Log("이전 웨이브를 클리어해야 다음 웨이브로 넘어갈 수 있습니다.");
+                return;
+            }
         }
 
         currentStage = nextStage;
@@ -203,7 +206,7 @@ public class StageManager : MonoBehaviour, ISaveable
             currentStage = 1;
             currentWave = 1;
             Debug.Log("최저 웨이브/스테이지입니다.");
-            return; // 더 이상 내릴 수 없음
+            return;
         }
         StartWave();
     }

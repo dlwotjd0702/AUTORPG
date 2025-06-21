@@ -2,15 +2,28 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Inventory;
+
+[Serializable]
+public class GachaLevelInfo
+{
+    public int level = 1;
+    public int exp = 0;
+    public Dictionary<int, float> gradeRates = new();
+}
 
 public class GachaSystem : MonoBehaviour
 {
     public int maxGrade = 20;
     public Dictionary<ItemType, GachaLevelInfo> gachaLevels = new();
+    public InventorySystem inventorySystem;
+    public PlayerGemManager gemManager;
+
+    public int singleRollCost = 5;
+    public int tenRollCost = 45;
 
     void Awake()
     {
-        // 모든 타입별 가챠 레벨 정보 초기화
         foreach (ItemType type in Enum.GetValues(typeof(ItemType)))
         {
             gachaLevels[type] = new GachaLevelInfo();
@@ -18,33 +31,61 @@ public class GachaSystem : MonoBehaviour
         }
     }
 
-    public void RollGacha(ItemType type, int count)
+    public bool RollGacha(ItemType type, int count)
     {
+        Debug.Log($"[Gacha] RollGacha 호출! type={type}, count={count}");
+
+        int cost = (count == 10) ? tenRollCost : singleRollCost * count;
+        if (!gemManager.SpendGems(cost))
+        {
+            Debug.Log($"[Gacha] 보석이 부족해서 뽑기 취소! (보유:{gemManager.Gems}/필요:{cost})");
+            return false;
+        }
+
+        var info = gachaLevels[type];
+
+        // 등급 확률을 for문 시작 전에 복사
+        var ratesCopy = info.gradeRates.ToList();
+
+        Debug.Log($"[Gacha] for문 진입! count={count}");
         for (int i = 0; i < count; i++)
         {
-            int grade = RollGradeForGacha(type);
-            string itemId = $"{type.ToString().ToLower()}_{grade:D2}";
-            // 인벤토리 등 추가처리...
-            // inventorySystem.AddItem(data, 1);
-            // ...
-            // 가챠 횟수 및 레벨업 처리
-            var info = gachaLevels[type];
-            info.rolls++;
-            if (info.rolls >= GetLevelUpThreshold(info.level))
+            Debug.Log($"[Gacha] for문 내부, i={i}");
+
+            int grade = RollGradeForGachaFromRates(ratesCopy);
+            string itemId = $"{type}_{grade:D2}";
+            Debug.Log($"[Gacha] 아이템 뽑기 시도: {itemId}");
+
+            var data = inventorySystem.GetEquipmentData(itemId);
+
+            if (data != null)
             {
+                inventorySystem.AddItem(data, 1);
+                Debug.Log($"[Gacha] 아이템 지급: {itemId} (등급:{grade}) 인벤토리 추가됨");
+            }
+            else
+            {
+                Debug.LogWarning($"[Gacha] 아이템 데이터 없음: {itemId}");
+            }
+
+            info.exp += 1;
+            if (info.exp >= GetLevelUpExp(info.level))
+            {
+                info.exp = 0;
                 info.level++;
-                info.rolls = 0;
+                Debug.Log($"[Gacha] {type} 가챠 레벨업! 현재 Lv.{info.level}");
                 UpdateGradeRates(type);
             }
         }
+        Debug.Log("[Gacha] for문 종료");
+        return true;
     }
 
-    public int RollGradeForGacha(ItemType type)
+    public int RollGradeForGachaFromRates(List<KeyValuePair<int, float>> ratesList)
     {
-        var rates = gachaLevels[type].gradeRates;
         float rand = UnityEngine.Random.value;
         float acc = 0f;
-        foreach (var kvp in rates.OrderByDescending(k => k.Key))
+        foreach (var kvp in ratesList.OrderBy(k => k.Key))
         {
             acc += kvp.Value;
             if (rand < acc)
@@ -53,47 +94,68 @@ public class GachaSystem : MonoBehaviour
         return 1;
     }
 
-    // 등급별 드랍률 표기용
-    public string GetDropRateString(ItemType type)
+
+    public int GetLevelUpExp(int level)
     {
-        var rates = gachaLevels[type].gradeRates;
-        return string.Join("\n", rates.OrderByDescending(k => k.Key)
-            .Select(kvp => $"{kvp.Key}등급: {(kvp.Value * 100f):0.###}%"));
+        return 20 + (level - 1) * 5;
     }
 
-    // 레벨업 기준 (예시)
-    int GetLevelUpThreshold(int level)
-    {
-        // 예: 10회 → 레벨1, 20회 → 레벨2, 40회 → 레벨3, ...
-        return 10 * (int)Mathf.Pow(2, level - 1);
-    }
+   
 
-    // 가챠 레벨에 따라 드랍률 재계산
+    // 등급 미만 가챠레벨에선 확률 0
     void UpdateGradeRates(ItemType type)
     {
         var info = gachaLevels[type];
         int level = info.level;
         float baseRate = 0.5f;
         Dictionary<int, float> rates = new();
-
         float sum = 0f;
         for (int grade = 1; grade <= maxGrade; grade++)
         {
-            float rate = baseRate / Mathf.Pow(2, grade - 1);
-
-            // 등급별 가챠레벨 보너스(예시, 고등급일수록 더 크게 증가)
-            if (grade > 1)
+            if (grade > 1 && level < grade)
             {
-                // 레벨이 오를 때마다 1등급에서 각 고등급으로 (등급-1)*level*0.002 보정치 분배
-                rate += (grade - 1) * level * 0.002f;
+                rates[grade] = 0f;
             }
-            rates[grade] = rate;
-            sum += rate;
+            else
+            {
+                float rate = baseRate / Mathf.Pow(2, grade - 1);
+                if (grade > 1)
+                    rate += (grade - 1) * level * 0.001f;
+                rates[grade] = rate;
+                sum += rate;
+            }
         }
-        // 전체를 1(100%)로 정규화
         foreach (var key in rates.Keys.ToList())
-            rates[key] /= sum;
-
+        {
+            if (sum == 0)
+                rates[1] = 1f;
+            else
+                rates[key] /= sum;
+        }
         info.gradeRates = rates;
+    }
+
+    // 4개씩 5줄 (20등급)
+    public string GetDropRateStringGrid(ItemType type)
+    {
+        var rates = gachaLevels[type].gradeRates;
+        int gradesPerLine = 4;
+        int lines = Mathf.CeilToInt(maxGrade / (float)gradesPerLine);
+
+        string result = "";
+        for (int l = 0; l < lines; l++)
+        {
+            var lineRates = new List<string>();
+            for (int g = 1; g <= gradesPerLine; g++)
+            {
+                int grade = l * gradesPerLine + g;
+                if (grade > maxGrade) break;
+                if (rates.TryGetValue(grade, out float rate))
+                    lineRates.Add($"{grade}등급: {(rate * 100f):0.###}%");
+            }
+            result += string.Join("    ", lineRates) + "\n";
+        }
+        result += $"(최대 {maxGrade}등급)";
+        return result;
     }
 }

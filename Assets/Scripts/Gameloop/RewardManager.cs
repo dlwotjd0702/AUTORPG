@@ -8,7 +8,7 @@ public class RewardManager : MonoBehaviour
     public UpgradeManager upgradeManager;
     public InventorySystem inventorySystem;
     public GachaSystem gachaSystem;
-
+    public PlayerGemManager gemManager;
     public void GrantReward(Player player, Monster monster)
     {
         // 경험치, 골드
@@ -36,10 +36,16 @@ public class RewardManager : MonoBehaviour
                         inventorySystem.AddItem(data, 1);
 
                     // 필요시 시각적 이펙트/팝업 등 처리
-                    Debug.Log($"[드랍] {itemId} 획득!");
+                   // Debug.Log($"[드랍] {itemId} 획득!");
                     break; // 한 번만 드랍
                 }
             }
+        }
+        float gemDropChance = 0.005f; // 0.5%
+        if (UnityEngine.Random.value < gemDropChance)
+        {
+            gemManager.AddGems(1);
+            Debug.Log("[Reward] 보석 드랍됨! 현재 보석: " + gemManager.Gems);
         }
     }
 }
