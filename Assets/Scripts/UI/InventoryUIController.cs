@@ -38,17 +38,17 @@ namespace Inventory
         [Header("상세패널(스킬)")]
         public SkillDetailPanel skillDetailPanel;
 
-        private ItemType currentPanelType = ItemType.Weapon;
+        private ItemType currentPanelType = ItemType.weapon;
         
         void Start()
         {
-            InitSlotPool(weaponContent, weaponSlots, inventory.GetAllOfType(ItemType.Weapon).Count, OnWeaponSlotClicked);
-            InitSlotPool(armorContent, armorSlots, inventory.GetAllOfType(ItemType.Armor).Count, OnArmorSlotClicked);
-            InitSlotPool(accessoryContent, accessorySlots, inventory.GetAllOfType(ItemType.Accessory).Count, OnAccessorySlotClicked);
-            InitSlotPool(skillContent, skillSlots, inventory.GetAllOfType(ItemType.Skill).Count, OnSkillSlotClicked);
+            InitSlotPool(weaponContent, weaponSlots, inventory.GetAllOfType(ItemType.weapon).Count, OnWeaponSlotClicked);
+            InitSlotPool(armorContent, armorSlots, inventory.GetAllOfType(ItemType.armor).Count, OnArmorSlotClicked);
+            InitSlotPool(accessoryContent, accessorySlots, inventory.GetAllOfType(ItemType.ring).Count, OnAccessorySlotClicked);
+            InitSlotPool(skillContent, skillSlots, inventory.GetAllOfType(ItemType.skill).Count, OnSkillSlotClicked);
 
 
-            ShowPanel(ItemType.Weapon); // 무기부터 보이게
+            ShowPanel(ItemType.weapon); // 무기부터 보이게
             inventory.OnInventoryChanged += () => ShowPanel(currentPanelType);
            
         }
@@ -78,25 +78,25 @@ namespace Inventory
 
         public void ShowPanel(ItemType type)
         {
-            weaponPanel.SetActive(type == ItemType.Weapon);
-            armorPanel.SetActive(type == ItemType.Armor);
-            accessoryPanel.SetActive(type == ItemType.Accessory);
-            skillPanel.SetActive(type == ItemType.Skill);
+            weaponPanel.SetActive(type == ItemType.weapon);
+            armorPanel.SetActive(type == ItemType.armor);
+            accessoryPanel.SetActive(type == ItemType.ring);
+            skillPanel.SetActive(type == ItemType.skill);
 
-            // 상세 패널 숨기기(초기화)
+            /*// 상세 패널 숨기기(초기화)
             itemDetailPanel?.gameObject.SetActive(false);
-            skillDetailPanel?.gameObject.SetActive(false);
+            skillDetailPanel?.gameObject.SetActive(false);*/
 
             switch (type)
             {
-                case ItemType.Weapon:
-                    RefreshPanel(weaponSlots, inventory.GetAllOfType(ItemType.Weapon), type); break;
-                case ItemType.Armor:
-                    RefreshPanel(armorSlots, inventory.GetAllOfType(ItemType.Armor), type); break;
-                case ItemType.Accessory:
-                    RefreshPanel(accessorySlots, inventory.GetAllOfType(ItemType.Accessory), type); break;
-                case ItemType.Skill:
-                    RefreshPanel(skillSlots, inventory.GetAllOfType(ItemType.Skill), type); break;
+                case ItemType.weapon:
+                    RefreshPanel(weaponSlots, inventory.GetAllOfType(ItemType.weapon), type); break;
+                case ItemType.armor:
+                    RefreshPanel(armorSlots, inventory.GetAllOfType(ItemType.armor), type); break;
+                case ItemType.ring:
+                    RefreshPanel(accessorySlots, inventory.GetAllOfType(ItemType.ring), type); break;
+                case ItemType.skill:
+                    RefreshPanel(skillSlots, inventory.GetAllOfType(ItemType.skill), type); break;
             }
             currentPanelType = type;
         }
@@ -149,10 +149,10 @@ namespace Inventory
         }
 
         // 카테고리 버튼
-        public void OnWeaponCategoryButtonClicked() { ShowPanel(ItemType.Weapon); }
-        public void OnArmorCategoryButtonClicked() { ShowPanel(ItemType.Armor); }
-        public void OnAccessoryCategoryButtonClicked() { ShowPanel(ItemType.Accessory); }
-        public void OnSkillCategoryButtonClicked() { ShowPanel(ItemType.Skill); }
+        public void OnWeaponCategoryButtonClicked() { ShowPanel(ItemType.weapon); }
+        public void OnArmorCategoryButtonClicked() { ShowPanel(ItemType.armor); }
+        public void OnAccessoryCategoryButtonClicked() { ShowPanel(ItemType.ring); }
+        public void OnSkillCategoryButtonClicked() { ShowPanel(ItemType.skill); }
 
         public void testButtonClicked()
         {

@@ -18,7 +18,7 @@ public class SkillSlotManager : MonoBehaviour
     public bool EquipSkill(int slotIdx, string skillId)
     {
         var slot = inventory.GetSlotById(skillId);
-        if (slot == null || !slot.isOwned || slot.itemData.type != ItemType.Skill)
+        if (slot == null || !slot.isOwned || slot.itemData.type != ItemType.skill)
             return false;
 
         skillSlots[slotIdx].itemData = slot.itemData;

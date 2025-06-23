@@ -204,9 +204,9 @@ namespace Inventory
             var target = GetSlotById(itemId);
             if (target == null || !target.isOwned)
                 return false;
-            if (target.itemData.type == ItemType.Weapon ||
-                target.itemData.type == ItemType.Armor ||
-                target.itemData.type == ItemType.Accessory)
+            if (target.itemData.type == ItemType.weapon ||
+                target.itemData.type == ItemType.armor ||
+                target.itemData.type == ItemType.ring)
             {
                 foreach (var slot in slots)
                     if (slot.isEquipped && slot.itemData.type == target.itemData.type)
@@ -233,7 +233,7 @@ namespace Inventory
             float atk = 0f, atkSpd = 0f;
             foreach (var slot in slots)
             {
-                if (slot.itemData == null || slot.itemData.type != ItemType.Weapon)
+                if (slot.itemData == null || slot.itemData.type != ItemType.weapon)
                     continue;
                 if (slot.isOwned)
                 {
@@ -254,7 +254,7 @@ namespace Inventory
             float def = 0f, hp = 0f;
             foreach (var slot in slots)
             {
-                if (slot.itemData == null || slot.itemData.type != ItemType.Armor)
+                if (slot.itemData == null || slot.itemData.type != ItemType.armor)
                     continue;
                 if (slot.isOwned)
                 {
@@ -275,7 +275,7 @@ namespace Inventory
             float critRate = 0f, critDmg = 0f;
             foreach (var slot in slots)
             {
-                if (slot.itemData == null || slot.itemData.type != ItemType.Accessory)
+                if (slot.itemData == null || slot.itemData.type != ItemType.ring)
                     continue;
                 if (slot.isOwned)
                 {
@@ -295,7 +295,7 @@ namespace Inventory
         {
             float val = 0f;
             foreach (var slot in slots)
-                if (slot.isOwned && slot.itemData.type == ItemType.Skill)
+                if (slot.isOwned && slot.itemData.type == ItemType.skill)
                     val += slot.itemData.SkillOwnedValue;
             return val;
         }
@@ -303,7 +303,7 @@ namespace Inventory
         {
             float val = 0f;
             foreach (var slot in slots)
-                if (slot.isEquipped && slot.itemData.type == ItemType.Skill)
+                if (slot.isEquipped && slot.itemData.type == ItemType.skill)
                     val += slot.itemData.SkillEquipValue;
             return val;
         }

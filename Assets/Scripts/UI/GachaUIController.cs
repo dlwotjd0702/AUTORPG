@@ -14,7 +14,7 @@ public class GachaUIController : MonoBehaviour
     void Start()
     {
         // 처음에 무기 패널만 열기
-        ShowPanel(ItemType.Weapon);
+        ShowPanel(ItemType.weapon);
     }
 
     public void ShowPanel(ItemType type)
@@ -28,26 +28,26 @@ public class GachaUIController : MonoBehaviour
         // 해당 패널만 열기
         switch (type)
         {
-            case ItemType.Weapon:
+            case ItemType.weapon:
                 if (weaponPanel) weaponPanel.SetActive(true); currentPanel = weaponPanel;
                 break;
-            case ItemType.Armor:
+            case ItemType.armor:
                 if (armorPanel) armorPanel.SetActive(true); currentPanel = armorPanel;
                 break;
-            case ItemType.Accessory:
+            case ItemType.ring:
                 if (accessoryPanel) accessoryPanel.SetActive(true); currentPanel = accessoryPanel;
                 break;
-            case ItemType.Skill:
+            case ItemType.skill:
                 if (skillPanel) skillPanel.SetActive(true); currentPanel = skillPanel;
                 break;
         }
     }
 
     // UI버튼에 이 함수 연결: Weapon 탭 버튼에 호출
-    public void OnWeaponButton() => ShowPanel(ItemType.Weapon);
-    public void OnArmorButton() => ShowPanel(ItemType.Armor);
-    public void OnAccessoryButton() => ShowPanel(ItemType.Accessory);
-    public void OnSkillButton() => ShowPanel(ItemType.Skill);
+    public void OnWeaponButton() => ShowPanel(ItemType.weapon);
+    public void OnArmorButton() => ShowPanel(ItemType.armor);
+    public void OnAccessoryButton() => ShowPanel(ItemType.ring);
+    public void OnSkillButton() => ShowPanel(ItemType.skill);
     public void OnCloseButton() => gameObject.SetActive(false);
     public void OnOpenButton() => gameObject.SetActive(true);
     

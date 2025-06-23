@@ -53,22 +53,14 @@ public class GachaSystem : MonoBehaviour
             Debug.Log($"[Gacha] for문 내부, i={i}");
 
             int grade = RollGradeForGachaFromRates(ratesCopy);
-            string itemId = $"{type}_{grade:D2}";
+            string itemId = $"{type}_{grade:D2}"; 
             Debug.Log($"[Gacha] 아이템 뽑기 시도: {itemId}");
 
-            var data = inventorySystem.GetEquipmentData(itemId);
+            EquipmentData data = inventorySystem.GetEquipmentData(itemId);
+            Debug.Log(data.type.ToString());
+            inventorySystem.AddItem(data, 1);
 
-            if (data != null)
-            {
-                inventorySystem.AddItem(data, 1);
-                Debug.Log($"[Gacha] 아이템 지급: {itemId} (등급:{grade}) 인벤토리 추가됨");
-            }
-            else
-            {
-                Debug.LogWarning($"[Gacha] 아이템 데이터 없음: {itemId}");
-            }
-
-            info.exp += 1;
+          info.exp += 1;
             if (info.exp >= GetLevelUpExp(info.level))
             {
                 info.exp = 0;

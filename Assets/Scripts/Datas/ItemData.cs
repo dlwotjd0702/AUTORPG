@@ -1,10 +1,10 @@
 using UnityEngine;
 public enum ItemType
 {
-    Weapon,
-    Armor,
-    Accessory,
-    Skill
+    weapon,
+    armor,
+    ring,
+    skill
 }
 public enum SkillType
 {
