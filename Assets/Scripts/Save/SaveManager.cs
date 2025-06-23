@@ -41,6 +41,7 @@ public class SaveManager : MonoBehaviour
         data.nickname = FirebaseManager.Instance.Email.Split('@')[0];
         foreach (var s in FindObjectsOfType<MonoBehaviour>().OfType<ISaveable>())
             s.CollectSaveData(data);
+        pendingSaveData = data;
 
         FirebaseManager.Instance.SaveGame(data, (success) => {
             Debug.Log(success ? "저장 완료" : "저장 실패");

@@ -25,18 +25,14 @@ public class StageManager : MonoBehaviour, ISaveable
     public List<StageWaveRecord> clearedStageWave = new List<StageWaveRecord>();
 
     public StageProgressMode progressMode = StageProgressMode.Advance;
-
     private int monstersAlive;
 
-    [System.Serializable]
-    public class StageMonsterPattern
-    {
-        public int stage;
-        public int[] prefabIndices;
-    }
-    public List<StageMonsterPattern> stagePatterns;
+    [Header("몬스터 기본 스탯(1마리 기준)")]
+    public float baseMaxHp = 10f;
+    public int baseGold = 20;
+    public int baseExp = 10;
+    public float baseAttack = 5f;
 
-    // --- UI 연결용 ---
     [Header("UI 연결")]
     public Button nextWaveButton;
     public Button prevWaveButton;
@@ -49,28 +45,34 @@ public class StageManager : MonoBehaviour, ISaveable
         if (prevWaveButton) prevWaveButton.onClick.AddListener(OnPrevWaveButton);
         if (toggleModeButton) toggleModeButton.onClick.AddListener(ToggleProgressMode);
 
-        UpdateProgressModeText();
-        StartWave();
+        if (SaveManager.pendingSaveData != null)
+        {
+            ApplyLoadedData(SaveManager.pendingSaveData);
+        }
+        else
+        {
+            UpdateProgressModeText();
+            StartWave();
+        }
     }
 
     public void StartWave()
     {
         monsterPool.DeactivateAll();
-
-        monstersAlive = 0;
         float spawnRadius = 3.0f;
         Vector3 playerPos = player.transform.position;
 
-        var pattern = stagePatterns.Find(p => p.stage == currentStage);
-        int[] spawnTypes = pattern != null ? pattern.prefabIndices : new int[] { 0 };
+        int prefabIdx = Mathf.Clamp(currentStage - 1, 0, monsterPool.monsterPrefabs.Count - 1);
 
-        int relativeWave = currentWave;
-        int relativeStage = currentStage;
+        float hpMultiplier     = 1f + (currentStage - 1) * 0.5f + (currentWave - 1) * 0.2f;
+        float goldMultiplier   = 1f + (currentStage - 1) * 0.3f + (currentWave - 1) * 0.1f;
+        float expMultiplier    = 1f + (currentStage - 1) * 0.15f + (currentWave - 1) * 0.05f;
+        float attackMultiplier = 1f + (currentStage - 1) * 0.2f + (currentWave - 1) * 0.1f;
 
-        float hpMultiplier     = 1f + (relativeStage - 1) * 0.5f + (relativeWave - 1) * 0.2f;
-        float goldMultiplier   = 1f + (relativeStage - 1) * 0.3f + (relativeWave - 1) * 0.1f;
-        float expMultiplier    = 1f + (relativeStage - 1) * 0.15f + (relativeWave - 1) * 0.05f;
-        float attackMultiplier = 1f + (relativeStage - 1) * 0.2f + (relativeWave - 1) * 0.1f;
+        float maxHp    = baseMaxHp * hpMultiplier;
+        int goldReward = Mathf.RoundToInt(baseGold * goldMultiplier);
+        int expReward  = Mathf.RoundToInt(baseExp * expMultiplier);
+        float atk      = baseAttack * attackMultiplier;
 
         for (int i = 0; i < monstersPerWave; i++)
         {
@@ -78,33 +80,24 @@ public class StageManager : MonoBehaviour, ISaveable
             Vector3 offset = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * spawnRadius;
             Vector3 spawnPos = playerPos + offset;
 
-            int prefabIdx = spawnTypes[i % spawnTypes.Length];
-
             Monster monster = monsterPool.Spawn(prefabIdx);
             monster.transform.position = spawnPos;
-
-            monster.maxHp      = Mathf.RoundToInt(monster.maxHp * hpMultiplier);
-            monster.goldReward = Mathf.RoundToInt(monster.goldReward * goldMultiplier);
-            monster.expReward  = Mathf.RoundToInt(monster.expReward * expMultiplier);
-            monster.attackPower= Mathf.RoundToInt(monster.attackPower * attackMultiplier);
+            monster.ApplyStats(maxHp, expReward, goldReward, atk);
 
             monster.OnMonsterDeath += OnMonsterDeath;
-            monstersAlive++;
         }
-
-        UpdateProgressModeText(); // 웨이브 시작마다 항상 UI 갱신
+        UpdateProgressModeText();
     }
 
     private void OnMonsterDeath(Monster monster)
     {
         rewardManager.GrantReward(player, monster);
-        monstersAlive--;
         monster.OnMonsterDeath -= OnMonsterDeath;
         monsterPool.ReturnToPool(monster);
 
-        if (monstersAlive <= 0)
+        // 모든 몬스터가 죽었는지 풀 기준으로 판정
+        if (!monsterPool.HasAliveMonster())
         {
-            // 클리어 정보 저장
             if (!clearedStageWave.Any(x => x.stage == currentStage && x.wave == currentWave))
                 clearedStageWave.Add(new StageWaveRecord { stage = currentStage, wave = currentWave });
 
@@ -114,7 +107,6 @@ public class StageManager : MonoBehaviour, ISaveable
                 maxClearedWave = currentWave;
             }
 
-            // 모드에 따라 분기
             if (progressMode == StageProgressMode.Advance)
                 NextWave();
             else
@@ -122,39 +114,15 @@ public class StageManager : MonoBehaviour, ISaveable
         }
     }
 
-    // --------- 반복/돌파 모드 전환 ---------
-    public void ToggleProgressMode()
+    public void OnNextWaveButton()
     {
-        progressMode = (progressMode == StageProgressMode.Repeat) ? StageProgressMode.Advance : StageProgressMode.Repeat;
-        UpdateProgressModeText();
-    }
-
-    // --------- UI 갱신(웨이브 시작마다 호출됨) ---------
-    private void UpdateProgressModeText()
-    {
-        if (progressModeText)
-            progressModeText.text = $"{currentStage} 스테이지 {currentWave}/10 Wave \n모드: {(progressMode == StageProgressMode.Advance ? "돌파" : "반복")}";
-    }
-
-    // --------- 플레이어 죽음 시 처리 ---------
-    public void OnPlayerDied()
-    {
-        if (currentWave > 1)
+        // 버튼에서는 반드시 클리어 조건 체크!
+        if (!clearedStageWave.Any(x => x.stage == currentStage && x.wave == currentWave))
         {
-            currentWave--;
+            Debug.Log("이전 웨이브를 클리어해야 다음 웨이브로 넘어갈 수 있습니다.");
+            return;
         }
-        else if (currentStage > 1)
-        {
-            currentStage--;
-            currentWave = maxWavePerStage;
-        }
-        else
-        {
-            currentStage = 1;
-            currentWave = 1;
-            return; // 더 이상 내릴 수 없음
-        }
-        StartWave();
+        NextWave();
     }
 
     public void NextWave()
@@ -173,25 +141,15 @@ public class StageManager : MonoBehaviour, ISaveable
             nextWave++;
         }
 
-        // Advance 모드에서는 이전 웨이브를 클리어한 경우에만 다음으로 진행
-        if (progressMode == StageProgressMode.Advance)
-        {
-            bool isPreviousCleared = clearedStageWave.Any(x => x.stage == currentStage && x.wave == currentWave);
-
-            if (!isPreviousCleared)
-            {
-                Debug.Log("이전 웨이브를 클리어해야 다음 웨이브로 넘어갈 수 있습니다.");
-                return;
-            }
-        }
-
         currentStage = nextStage;
         currentWave = nextWave;
         StartWave();
     }
 
+
     public void PrevWave()
     {
+        // 살아있는 몬스터가 있어도 이전 웨이브로 이동 허용
         if (currentWave > 1)
         {
             currentWave--;
@@ -211,22 +169,40 @@ public class StageManager : MonoBehaviour, ISaveable
         StartWave();
     }
 
-    public void MoveToStageWave(int stage, int wave)
+    public void ToggleProgressMode()
     {
-        if (clearedStageWave.Any(x => x.stage == stage && x.wave == wave))
+        progressMode = (progressMode == StageProgressMode.Repeat) ? StageProgressMode.Advance : StageProgressMode.Repeat;
+        UpdateProgressModeText();
+    }
+
+    private void UpdateProgressModeText()
+    {
+        if (progressModeText)
+            progressModeText.text = $"{currentStage} 스테이지 {currentWave}/10 Wave \n모드: {(progressMode == StageProgressMode.Advance ? "돌파" : "반복")}";
+    }
+
+    public void OnPlayerDied()
+    {
+        if (currentWave > 1)
         {
-            currentStage = stage;
-            currentWave = wave;
-            StartWave();
+            currentWave--;
+        }
+        else if (currentStage > 1)
+        {
+            currentStage--;
+            currentWave = maxWavePerStage;
         }
         else
         {
-            Debug.LogWarning($"아직 클리어하지 않은 스테이지/웨이브: {stage}-{wave}");
+            currentStage = 1;
+            currentWave = 1;
+            return;
         }
+        StartWave();
     }
 
-    // 버튼용 OnClick
-    public void OnNextWaveButton() => NextWave();
+    
+
     public void OnPrevWaveButton() => PrevWave();
 
     // --------- 세이브/로드용 ---------
@@ -244,10 +220,10 @@ public class StageManager : MonoBehaviour, ISaveable
     public void ApplyLoadedData(SaveData save)
     {
         if (save == null) return;
-        currentStage = save.currentStage;
-        currentWave = save.currentWave;
-        maxClearedStage = save.maxClearedStage;
-        maxClearedWave = save.maxClearedWave;
+        currentStage = Mathf.Max(1, save.currentStage);
+        currentWave = Mathf.Max(1, save.currentWave);
+        maxClearedStage = Mathf.Max(currentStage, save.maxClearedStage);
+        maxClearedWave = Mathf.Max(currentWave, save.maxClearedWave);
         clearedStageWave = save.clearedStageWave
             .Select(x => new StageWaveRecord { stage = x.stage, wave = x.wave }).ToList();
         progressMode = (StageProgressMode)save.progressMode;

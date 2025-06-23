@@ -9,7 +9,6 @@ namespace Stats
         [Header("골드 및 연동")]
         public int gold = 0;
         public PlayerStats playerStats;
-     
 
         [Header("강화 단계 (각 스탯별)")]
         [SerializeField] public int atkUpgradeLevel = 0;
@@ -29,9 +28,9 @@ namespace Stats
         [SerializeField] private float costIncreaseRate = 0.1f; // 10%씩 증가
 
         [Header("드랍률 업그레이드")]
-        [SerializeField] public float baseDropRate = 0.2f;    // 20% 기본
-        [SerializeField] public float penaltyPerGrade = 0.05f; // 등급당 -5%
-        [SerializeField] public int dropRateUpgradeLevel = 0; // 전체 드랍률 업
+        [SerializeField] public float baseDropRate = 0.2f;
+        [SerializeField] public float penaltyPerGrade = 0.05f;
+        [SerializeField] public int dropRateUpgradeLevel = 0;
         public event Action OnGoldChanged = delegate { };
 
         // 비용 계산
@@ -39,35 +38,31 @@ namespace Stats
         {
             return Mathf.RoundToInt(baseCost * Mathf.Pow(1f + costIncreaseRate, level));
         }
-        public int GetAttackUpgradeCost()    => CalcUpgradeCost(attackUpgradeCost, atkUpgradeLevel);
-        public int GetDefenseUpgradeCost()   => CalcUpgradeCost(defenseUpgradeCost, defUpgradeLevel);
-        public int GetHpUpgradeCost()        => CalcUpgradeCost(hpUpgradeCost, hpUpgradeLevel);
-        public int GetAtkSpdUpgradeCost()    => CalcUpgradeCost(atkSpdUpgradeCost, atkSpdUpgradeLevel);
-        public int GetCritRateUpgradeCost()  => CalcUpgradeCost(critRateUpgradeCost, critRateUpgradeLevel);
-        public int GetCritDmgUpgradeCost()   => CalcUpgradeCost(critDmgUpgradeCost, critDmgUpgradeLevel);
+        public int GetAttackUpgradeCost() => CalcUpgradeCost(attackUpgradeCost, atkUpgradeLevel);
+        public int GetDefenseUpgradeCost() => CalcUpgradeCost(defenseUpgradeCost, defUpgradeLevel);
+        public int GetHpUpgradeCost() => CalcUpgradeCost(hpUpgradeCost, hpUpgradeLevel);
+        public int GetAtkSpdUpgradeCost() => CalcUpgradeCost(atkSpdUpgradeCost, atkSpdUpgradeLevel);
+        public int GetCritRateUpgradeCost() => CalcUpgradeCost(critRateUpgradeCost, critRateUpgradeLevel);
+        public int GetCritDmgUpgradeCost() => CalcUpgradeCost(critDmgUpgradeCost, critDmgUpgradeLevel);
 
-   
         void Start()
         {
             var save = SaveManager.pendingSaveData;
             if (save != null)
                 ApplyLoadedData(save);
         }
+
         public int GetDropRateUpgradeCost()
         {
-            // 드랍률 업그레이드 비용 (예시 공식)
             return 1000 * (dropRateUpgradeLevel + 1);
         }
 
-        // 드랍률 계산
         public float GetCurrentDropRate()
         {
-            // 업그레이드마다 +2% 추가 (예시)
             return baseDropRate + (dropRateUpgradeLevel * 0.02f);
         }
         public float GetDropChanceForGrade(int grade)
         {
-            // 등급별 드랍확률(음수면 0, 등급 1~20)
             float result = GetCurrentDropRate() - penaltyPerGrade * (grade - 1);
             return Mathf.Max(0f, result);
         }
@@ -145,15 +140,12 @@ namespace Stats
             return true;
         }
 
-        // 골드 추가 (외부 보상 등에서 호출)
         public void AddGold(int amount)
         {
             gold += amount;
             OnGoldChanged.Invoke();
-//            Debug.Log($"[UpgradeManager] 골드 획득: {amount} (현재 GOLD: {gold})");
-
         }
-        
+
         public void ApplyLoadedData(SaveData data)
         {
             if (data == null) return;
@@ -165,6 +157,18 @@ namespace Stats
             critRateUpgradeLevel = data.critRateUpgradeLevel;
             critDmgUpgradeLevel = data.critDmgUpgradeLevel;
             dropRateUpgradeLevel = data.dropRateUpgradeLevel;
+
+            // 스탯 전체 초기화 후 강화 레벨만큼 적용 (PlayerStats에 ResetAllUpgrades 메서드 필요)
+            if (playerStats != null)
+            {
+                playerStats.ResetAllUpgrades();
+                for (int i = 0; i < atkUpgradeLevel; i++) playerStats.UpgradeAttack();
+                for (int i = 0; i < defUpgradeLevel; i++) playerStats.UpgradeDefense();
+                for (int i = 0; i < hpUpgradeLevel; i++) playerStats.UpgradeHp();
+                for (int i = 0; i < atkSpdUpgradeLevel; i++) playerStats.UpgradeAtkSpeed();
+                for (int i = 0; i < critRateUpgradeLevel; i++) playerStats.UpgradeCritRate();
+                for (int i = 0; i < critDmgUpgradeLevel; i++) playerStats.UpgradeCritDmg();
+            }
         }
 
         public void CollectSaveData(SaveData data)

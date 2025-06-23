@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using System.Linq;
 using IdleRPG;
 using UnityEngine;
 
 public class MonsterPool : MonoBehaviour
 {
-    public List<GameObject> monsterPrefabs; // 0,1,2... 각 프리팹 인덱스
+    public List<GameObject> monsterPrefabs;
     private List<Monster> pool = new List<Monster>();
 
     public Monster Spawn(int prefabIndex = 0)
@@ -17,8 +18,7 @@ public class MonsterPool : MonoBehaviour
             monster.prefabIndex = prefabIndex;
             pool.Add(monster);
         }
-        monster.currentHp = monster.maxHp;
-        monster.gameObject.SetActive(true);
+        monster.ResetMonster();
         return monster;
     }
 
@@ -27,10 +27,15 @@ public class MonsterPool : MonoBehaviour
         monster.gameObject.SetActive(false);
     }
 
-    // 현재 활성화된 몬스터 모두 끄기
     public void DeactivateAll()
     {
         foreach (var m in pool)
             m.gameObject.SetActive(false);
+    }
+
+    // ★ 살아있는 몬스터 체크
+    public bool HasAliveMonster()
+    {
+        return pool.Any(m => m.gameObject.activeInHierarchy);
     }
 }

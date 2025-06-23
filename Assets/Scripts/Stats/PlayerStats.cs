@@ -23,11 +23,20 @@ namespace Stats
         private int baseDefense = 0;
         private int baseHp = 1000;
         private float baseCritRate = 0.05f;   // 5%
-        private float baseCritDmg = 1.5f;   
+        private float baseCritDmg = 1.5f;
 
+        public void ResetAllUpgrades()
+        {
+             baseAttack = 5;
+             baseAtkSpeed = 1.0f;
+             baseDefense = 0;
+             baseHp = 1000;
+             baseCritRate = 0.05f;   // 5%
+             baseCritDmg = 1.5f;
+        }
         // 캐싱(자동 갱신)
         public float FinalAttack { get; private set; }
-        public float FinalAtkSpeed { get; private set; }
+        public float FinalAtkSpeed;
         public float FinalDefense { get; private set; }
         public float FinalHp { get; private set; }
         public float FinalCritRate { get; private set; }

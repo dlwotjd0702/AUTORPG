@@ -5,19 +5,20 @@ using Combat;
 namespace IdleRPG
 {
     [DefaultExecutionOrder(100)]
-    public class Monster : MonoBehaviour, IDamageable,IAttackStat
+    public class Monster : MonoBehaviour, IDamageable, IAttackStat
     {
         public float moveSpeed = 3f;
         public float attackRange = 1.5f;
         public float attackCooldown = 1.2f;
+
         public float maxHp = 5;
         public int expReward = 10;
         public int goldReward = 20;
-        public string equipmentDropId;
-        public string skillDropId;
-        public int prefabIndex = 0;
+        public float attackPower = 5f;
+
+        public int prefabIndex { get; set; }
         public Animator animator;
-        public Collider weaponCollider; // 몬스터가 무기 콜라이더 갖는 경우
+        public Collider weaponCollider;
 
         public float currentHp;
         [HideInInspector] public bool isAttacking = false;
@@ -25,25 +26,21 @@ namespace IdleRPG
         [HideInInspector] public GameObject target;
         public bool isDead;
 
-        public float attackPower = 5f; // 또는 계산된 값
         public float GetAttackPower() => attackPower;
-        // ⭐️ 이벤트 선언 (풀링/스테이지 매니저에서 구독)
         public event Action<Monster> OnMonsterDeath;
 
         void Awake()
         {
             if (!animator) animator = GetComponent<Animator>();
             if (weaponCollider) weaponCollider.enabled = false;
-            // 풀링 구조라면 currentHp 초기화는 Spawn/reset에서!
         }
+
         private void OnEnable()
         {
             animator.applyRootMotion = false;
-            isDead=false;
-            currentHp = maxHp;
+            isDead = false;
             if (animator == null)
                 animator = GetComponent<Animator>();
-
             SceneLinkedSMB<Monster>.Initialise(animator, this);
         }
 
@@ -52,47 +49,55 @@ namespace IdleRPG
             SceneLinkedSMB<Monster>.Initialise(animator, this);
         }
 
+        // 풀에서만 호출!
+        public void SetPrefabIndex(int idx) => prefabIndex = idx;
+
+        // 스테이지매니저에서 호출!
+        public void ApplyStats(float maxHp, int expReward, int goldReward, float attackPower)
+        {
+            this.maxHp = maxHp;
+            this.currentHp = maxHp;
+            this.expReward = expReward;
+            this.goldReward = goldReward;
+            this.attackPower = attackPower;
+        }
+
         public void TakeDamage(float amount)
         {
-//            Debug.Log($"{amount}TakeDamage");
             currentHp -= amount;
-            if (currentHp <= 0)
+            if (currentHp <= 0 && !isDead)
             {
                 currentHp = 0;
                 animator.CrossFade("Death", 0.05f);
                 Deathmotion();
             }
-            // else { animator.SetTrigger("Hit"); }
         }
 
         public void Deathmotion()
         {
             animator.applyRootMotion = true;
-            isDead=true;
+            isDead = true;
             Invoke(nameof(OnDeath), 2f);
         }
         public void OnDeath()
         {
             OnMonsterDeath?.Invoke(this);
-            
         }
 
-        // StageManager/MonsterPool에서 호출할 함수
         public void ResetMonster()
         {
-            currentHp = maxHp;
             isAttacking = false;
             isMoving = false;
-            // 위치/애니메이션 초기화 등 필요시 추가
+            isDead = false;
+            currentHp = maxHp;
+            if (weaponCollider) weaponCollider.enabled = false;
             gameObject.SetActive(true);
         }
 
-        // ----------- [콜라이더 ON/OFF] -----------
         public void EnableWeaponCollider()
         {
             if (weaponCollider) weaponCollider.enabled = true;
         }
-
         public void DisableWeaponCollider()
         {
             if (weaponCollider) weaponCollider.enabled = false;

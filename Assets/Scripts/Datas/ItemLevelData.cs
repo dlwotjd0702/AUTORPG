@@ -61,6 +61,7 @@
             // 원하는 효과만 표기 (예시: 공격력, 방어력, 체력 등)
             string s = "";
             if (itemData.OwnedAtkPercent > 0) s += $"공격력 +{OwnedAtkPercent * 100f:F1}% ";
+            if (itemData.OwnedAtkSpdPercent > 0) s += $"공속 +{OwnedAtkPercent * 100f:F1}% ";
             if (itemData.OwnedDefPercent > 0) s += $"방어력 +{OwnedDefPercent * 100f:F1}% ";
             if (itemData.OwnedHpPercent > 0) s += $"체력 +{OwnedHpPercent * 100f:F1}% ";
             if (itemData.OwnedCritRatePercent > 0) s += $"치명타확률 +{OwnedCritRatePercent * 100f:F1}% ";
@@ -72,6 +73,7 @@
         {
             string s = "";
             if (itemData.EquipAtkPercent > 0) s += $"공격력 +{EquipAtkPercent * 100f:F1}% ";
+            if (itemData.EquipAtkSpdPercent > 0) s += $"공속 +{EquipAtkPercent * 100f:F1}% ";
             if (itemData.EquipDefPercent > 0) s += $"방어력 +{EquipDefPercent * 100f:F1}% ";
             if (itemData.EquipHpPercent > 0) s += $"체력 +{EquipHpPercent * 100f:F1}% ";
             if (itemData.EquipCritRatePercent > 0) s += $"치명타확률 +{EquipCritRatePercent * 100f:F1}% ";
