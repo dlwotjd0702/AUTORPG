@@ -56,13 +56,13 @@ namespace Stats
         void RefreshUI()
         {
             goldText.text         = $"GOLD : {upgradeManager.gold}";
-            atkCostText.text      = $"{upgradeManager.atkUpgradeLevel}Level 비용: {upgradeManager.GetAttackUpgradeCost()}";
-            defCostText.text      = $"{upgradeManager.defUpgradeLevel}Level 비용: {upgradeManager.GetDefenseUpgradeCost()}";
-            hpCostText.text       = $"{upgradeManager.hpUpgradeLevel}Level 비용: {upgradeManager.GetHpUpgradeCost()}";
-            atkSpdCostText.text   = $"{upgradeManager.atkSpdUpgradeLevel}Level 비용: {upgradeManager.GetAtkSpdUpgradeCost()}";
-            critRateCostText.text = $"{upgradeManager.critRateUpgradeLevel}Level 비용: {upgradeManager.GetCritRateUpgradeCost()}";
-            critDmgCostText.text  = $"{upgradeManager.critDmgUpgradeLevel}Level 비용: {upgradeManager.GetCritDmgUpgradeCost()}";
-            dropRateCostText.text     = $"드랍률: {upgradeManager.GetCurrentDropRate() * 100f:F1} 비용: {upgradeManager.GetDropRateUpgradeCost()}%";
+            atkCostText.text      = $"Attack {upgradeManager.atkUpgradeLevel}Level 비용: {upgradeManager.GetAttackUpgradeCost()}";
+            defCostText.text      = $"Defense {upgradeManager.defUpgradeLevel}Level 비용: {upgradeManager.GetDefenseUpgradeCost()}";
+            hpCostText.text       = $"Hp {upgradeManager.hpUpgradeLevel}Level 비용: {upgradeManager.GetHpUpgradeCost()}";
+            atkSpdCostText.text   = $"AtkSpd {upgradeManager.atkSpdUpgradeLevel}Level 비용: {upgradeManager.GetAtkSpdUpgradeCost()}";
+            critRateCostText.text = $"CritRate {upgradeManager.critRateUpgradeLevel}Level 비용: {upgradeManager.GetCritRateUpgradeCost()}";
+            critDmgCostText.text  = $"CritDmg {upgradeManager.critDmgUpgradeLevel}Level 비용: {upgradeManager.GetCritDmgUpgradeCost()}";
+            dropRateCostText.text     = $"드랍률: {upgradeManager.GetCurrentDropRate() * 100f:F1} 비용: {upgradeManager.GetDropRateUpgradeCost()}";
       
         }
 
@@ -104,6 +104,7 @@ namespace Stats
                 RefreshUI();
         }
 
+        
         public void OnCloseButton()
         {
             gameObject.SetActive(false);
