@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
@@ -23,6 +24,12 @@ namespace Inventory
         private InventorySystem inventory;
         private Item currentItem;
         private string currentId;
+        public GameObject skillDetailPanel;
+
+        private void OnEnable()
+        {
+            skillDetailPanel.SetActive(false);
+        }
 
         public void Init(InventorySystem system)
         {

@@ -31,46 +31,36 @@ public class GachaSystem : MonoBehaviour
         }
     }
 
-    public bool RollGacha(ItemType type, int count)
+    /// <summary>
+    /// 뽑기 결과를 반환한다. 보석 부족시 null.
+    /// </summary>
+    public List<EquipmentData> RollGachaAndGetResult(ItemType type, int count)
     {
-        Debug.Log($"[Gacha] RollGacha 호출! type={type}, count={count}");
-
+        List<EquipmentData> results = new();
         int cost = (count == 10) ? tenRollCost : singleRollCost * count;
         if (!gemManager.SpendGems(cost))
-        {
-            Debug.Log($"[Gacha] 보석이 부족해서 뽑기 취소! (보유:{gemManager.Gems}/필요:{cost})");
-            return false;
-        }
+            return null;
 
         var info = gachaLevels[type];
-
-        // 등급 확률을 for문 시작 전에 복사
         var ratesCopy = info.gradeRates.ToList();
 
-        Debug.Log($"[Gacha] for문 진입! count={count}");
         for (int i = 0; i < count; i++)
         {
-            Debug.Log($"[Gacha] for문 내부, i={i}");
-
             int grade = RollGradeForGachaFromRates(ratesCopy);
-            string itemId = $"{type}_{grade:D2}"; 
-            Debug.Log($"[Gacha] 아이템 뽑기 시도: {itemId}");
-
+            string itemId = $"{type}_{grade:D2}";
             EquipmentData data = inventorySystem.GetEquipmentData(itemId);
-            Debug.Log(data.type.ToString());
             inventorySystem.AddItem(data, 1);
+            results.Add(data);
 
-          info.exp += 1;
+            info.exp += 1;
             if (info.exp >= GetLevelUpExp(info.level))
             {
                 info.exp = 0;
                 info.level++;
-                Debug.Log($"[Gacha] {type} 가챠 레벨업! 현재 Lv.{info.level}");
                 UpdateGradeRates(type);
             }
         }
-        Debug.Log("[Gacha] for문 종료");
-        return true;
+        return results;
     }
 
     public int RollGradeForGachaFromRates(List<KeyValuePair<int, float>> ratesList)
@@ -86,15 +76,11 @@ public class GachaSystem : MonoBehaviour
         return 1;
     }
 
-
     public int GetLevelUpExp(int level)
     {
         return 20 + (level - 1) * 5;
     }
 
-   
-
-    // 등급 미만 가챠레벨에선 확률 0
     void UpdateGradeRates(ItemType type)
     {
         var info = gachaLevels[type];
@@ -127,7 +113,6 @@ public class GachaSystem : MonoBehaviour
         info.gradeRates = rates;
     }
 
-    // 4개씩 5줄 (20등급)
     public string GetDropRateStringGrid(ItemType type)
     {
         var rates = gachaLevels[type].gradeRates;

@@ -18,6 +18,12 @@ namespace Inventory
 
         private InventorySystem inventory;
         private string currentSkillId;
+        public GameObject equipDetailPanel;
+
+        private void OnEnable()
+        {
+            equipDetailPanel.SetActive(false);
+        }
 
         public void Init(InventorySystem inv)
         {

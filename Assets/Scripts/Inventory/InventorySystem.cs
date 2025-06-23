@@ -362,8 +362,22 @@ namespace Inventory
         
         public void EquipSkill(int slotIdx, string skillId)
         {
+            // 보유한 스킬만 장착 가능
+            var slot = GetSlotById(skillId);
+            if (slot == null || !slot.isOwned || slot.itemData.type != ItemType.skill)
+                return;
+
+            // 이미 다른 슬롯에 이 스킬이 박혀있으면 해당 슬롯 비우기
+            for (int i = 0; i < equippedSkillIds.Length; i++)
+            {
+                if (equippedSkillIds[i] == skillId)
+                    equippedSkillIds[i] = null;
+            }
+
+            // 지정한 슬롯에만 장착
             equippedSkillIds[slotIdx] = skillId;
-            // 필요하면: 인게임 UI/슬롯 등과 연동(이벤트, 직접 호출 등)
+            // 필요하면 인게임 UI/슬롯 등 동기화(이벤트 호출 등)
+            OnInventoryChanged?.Invoke();
         }
 
         public void EnhanceSkill(string skillId)

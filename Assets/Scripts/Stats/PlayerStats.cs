@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Stats
 {
-    public class PlayerStats : MonoBehaviour,ISaveable
+    public class PlayerStats : MonoBehaviour, ISaveable
     {
         [Header("연동 시스템")]
         public InventorySystem inventory;
@@ -16,24 +16,15 @@ namespace Stats
         public int exp = 0;
         public int expToLevelUp = 100;
 
-        // Base 스탯 (초기값은 인스펙터에서 할당 or 직접 지정)
+        // Base 스탯
         [Header("Base Stat(최초/강화/레벨업 모두 반영)")]
         private int baseAttack = 5;
         private float baseAtkSpeed = 1.0f;
         private int baseDefense = 0;
         private int baseHp = 1000;
-        private float baseCritRate = 0.05f;   // 5%
+        private float baseCritRate = 0.05f;
         private float baseCritDmg = 1.5f;
 
-        public void ResetAllUpgrades()
-        {
-             baseAttack = 5;
-             baseAtkSpeed = 1.0f;
-             baseDefense = 0;
-             baseHp = 1000;
-             baseCritRate = 0.05f;   // 5%
-             baseCritDmg = 1.5f;
-        }
         // 캐싱(자동 갱신)
         public float FinalAttack { get; private set; }
         public float FinalAtkSpeed;
@@ -110,42 +101,71 @@ namespace Stats
 
         public void RefreshStats()
         {
-            // 무기: 공격력, 공격속도
             var (atkMul, atkSpdMul) = inventory.GetWeaponMultipliers();
             FinalAttack = Mathf.FloorToInt(baseAttack * atkMul);
             FinalAtkSpeed = baseAtkSpeed * atkSpdMul;
 
-            // 방어구: 방어력, 체력
             var (defMul, hpMul) = inventory.GetArmorMultipliers();
             FinalDefense = Mathf.FloorToInt(baseDefense * defMul);
             FinalHp = Mathf.FloorToInt(baseHp * hpMul);
 
-            // 악세: 크리확률, 크리뎀
             var (critRateMul, critDmgMul) = inventory.GetAccessoryMultipliers();
             FinalCritRate = baseCritRate * critRateMul;
             FinalCritDmg = baseCritDmg * critDmgMul;
 
             OnStatsChanged?.Invoke();
         }
+
         public void ApplyLoadedData(SaveData data)
         {
             if (data == null) return;
             level = data.level;
             exp = data.exp;
             expToLevelUp = data.expToLevelUp;
-            // baseAttack, baseHp, baseDefense 등 필요시 data에서 추가
         }
         public void CollectSaveData(SaveData data)
         {
             data.level = level;
             data.exp = exp;
             data.expToLevelUp = expToLevelUp;
-            // baseAttack, baseHp, baseDefense 등 필요시 data에 추가
         }
 
         // ----------- 이벤트들 -------------
         public event Action OnStatsChanged = delegate { };
         public event Action OnExpChanged = delegate { };
         public event Action<int> OnLevelUp = delegate { };
+
+        // ----------- [스킬 효과 직접 적용 부분] -------------
+        public void AddPassiveSkillEffect(EquipmentData skill)
+        {
+            if (skill == null) return;
+            if (skill.skillOwnedValue != null)
+            {
+                UpgradeAttack(Mathf.RoundToInt((float)skill.skillOwnedValue));
+                UpgradeHp(Mathf.RoundToInt((float)skill.skillOwnedValue));
+            }
+
+            // 원하는 효과 추가 가능
+        }
+
+        public void ActivateSkill(EquipmentData skill)
+        {
+            if (skill == null) return;
+            // 실전에서 원하는 액티브 효과를 여기서 처리
+            // 예시: 체력 회복, 공격력 버프 등
+            Debug.Log($"액티브 스킬 [{skill.name}] 발동! 효과치: {skill.skillPower}");
+            // 필요시 직접 스탯에 적용:
+            // UpgradeHp(Mathf.RoundToInt(skill.skillPower));
+        }
+
+        public void ResetAllUpgrades()
+        {
+            baseAttack = 5;
+            baseAtkSpeed = 1.0f;
+            baseDefense = 0;
+            baseHp = 1000;
+            baseCritRate = 0.05f;
+            baseCritDmg = 1.5f;
+        }
     }
 }

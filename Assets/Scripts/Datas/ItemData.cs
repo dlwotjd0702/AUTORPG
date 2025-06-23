@@ -37,7 +37,7 @@ public enum SkillType
         public float? skillOwnedValue { get; set; }
         public float? skillEquipValue { get; set; }
         public float? cooldown { get; set; }
-        public int? skillPower { get; set; }
+        public float? skillPower { get; set; }
         public int? maxLevel { get; set; }
         public string description { get; set; }
 
@@ -65,7 +65,7 @@ public enum SkillType
         public float SkillOwnedValue => skillOwnedValue ?? 0f;
         public float SkillEquipValue => skillEquipValue ?? 0f;
         public float Cooldown => cooldown ?? 0f;
-        public int SkillPower => skillPower ?? 0;
+        public float SkillPower => skillPower ?? 0;
         public int MaxLevel => maxLevel ?? 0;
     }
 

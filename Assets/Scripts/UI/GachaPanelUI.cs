@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class GachaPanelUI : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class GachaPanelUI : MonoBehaviour
 
     [Header("가챠 시스템 연결")]
     public GachaSystem gachaSystem;
+    public GachaResultPopupUI resultPopupUI; // <--- Inspector에서 연결
 
     void Start()
     {
@@ -28,14 +30,22 @@ public class GachaPanelUI : MonoBehaviour
 
     void RollOne()
     {
-        if (gachaSystem.RollGacha(panelType, 1))
+        var results = gachaSystem.RollGachaAndGetResult(panelType, 1);
+        if (results != null)
+        {
             UpdatePanel();
+            resultPopupUI.Show(results); // 결과 팝업 띄움
+        }
     }
 
     void RollTen()
     {
-        if (gachaSystem.RollGacha(panelType, 10))
+        var results = gachaSystem.RollGachaAndGetResult(panelType, 10);
+        if (results != null)
+        {
             UpdatePanel();
+            resultPopupUI.Show(results);
+        }
     }
 
     void UpdatePanel()
