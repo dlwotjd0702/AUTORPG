@@ -7,7 +7,7 @@ public class MultiHitSkill : SkillBase
     int hitCount;
     float dmgRatio;
 
-    public MultiHitSkill(EquipmentData data, int count, float ratio) : base(data)
+    public MultiHitSkill(EquipmentData data, int count, float ratio, SkillManager manager) : base(data, manager)
     {
         hitCount = count;
         dmgRatio = ratio;

@@ -22199,6 +22199,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inventory: {fileID: 1706361785}
   playerStats: {fileID: 5834091000042434458}
+  effectPrefabs:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!4 &1909015775
 Transform:
   m_ObjectHideFlags: 0

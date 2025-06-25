@@ -3,16 +3,22 @@ using Stats;
 
 public class SingleTargetDamageSkill : SkillBase
 {
-    public SingleTargetDamageSkill(EquipmentData data) : base(data) { }
+    public SingleTargetDamageSkill(EquipmentData data, SkillManager manager) : base(data, manager) { }
 
     protected override void UseSkill()
     {
         var target = FindNearestMonster(playerStats.transform.position, 10f);
-        if (target != null)
+        if (target == null) return;
+
+        var projectilePrefab = skillManager.GetEffectPrefab(Data.id);
+        if (!projectilePrefab) return;
+
+        var projectile = Object.Instantiate(projectilePrefab, playerStats.transform.position, Quaternion.identity);
+        projectile.AddComponent<ProjectileMover>().Init(target.transform, () =>
         {
-            float dmg = (float)(playerStats.FinalAttack * Data.skillPower);
-            target.TakeDamage(dmg);
-            Debug.Log($"{Data.name} → {target.name}에게 {dmg} 데미지!");
-        }
+            float damage = playerStats.FinalAttack * Data.SkillPower;
+            target.TakeDamage(damage);
+            Debug.Log($"{Data.name} (투사체) → {target.name}에게 {damage} 데미지!");
+        });
     }
 }

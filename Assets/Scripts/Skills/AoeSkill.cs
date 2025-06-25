@@ -4,28 +4,28 @@ using Stats;
 
 public class AoeSkill : SkillBase
 {
-    public AoeSkill(EquipmentData data) : base(data) { }
+    private float aoeRadius = 6f; // 필요에 따라 조절
+
+    public AoeSkill(EquipmentData data, SkillManager manager) : base(data, manager) { }
 
     protected override void UseSkill()
     {
-        // 전체 적 가져오기 (예: 태그가 "Enemy"인 오브젝트들)
-        var enemies = GameObject.FindGameObjectsWithTag("Enemy");
         int hitCount = 0;
-        foreach (var enemyObj in enemies)
+        foreach (var m in GameObject.FindObjectsOfType<Monster>())
         {
-            var monster = enemyObj.GetComponent<Monster>();
-            if (monster == null) continue;
-
-            float dmg = (float)(playerStats.FinalAttack * Data.skillPower);
-            monster.TakeDamage(dmg);
-            hitCount++;
-
-            // 얼음폭풍(빙결): skill_10만 추가 적용
-            if (Data.id == "skill_10")
+            float dist = Vector3.Distance(playerStats.transform.position, m.transform.position);
+            if (dist <= aoeRadius)
             {
-                monster.ApplyCrowdControl("Freeze", 2f); // 직접 함수 구현 필요
+                float dmg = playerStats.FinalAttack * Data.SkillPower;
+                m.TakeDamage(dmg);
+                hitCount++;
             }
         }
-        Debug.Log($"{Data.name}: 전체 적 {hitCount}명에게 {Data.skillPower}배 피해!");
+
+        var effect = skillManager.GetEffectPrefab(Data.id);
+        if (effect)
+            Object.Instantiate(effect, playerStats.transform.position, Quaternion.identity);
+
+        Debug.Log($"{Data.name} (범위 즉발): {hitCount}명 피해");
     }
 }

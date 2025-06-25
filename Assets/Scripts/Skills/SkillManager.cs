@@ -8,6 +8,9 @@ public class SkillManager : MonoBehaviour
     public InventorySystem inventory;
     public PlayerStats playerStats;
 
+    // 🟢 skill_01 ~ skill_20을 순서대로 드래그 (0 = skill_01, 19 = skill_20)
+    public GameObject[] effectPrefabs = new GameObject[20];
+
     // 현재 장착된 스킬만 관리
     public Dictionary<string, SkillBase> skillDict = new();
 
@@ -32,24 +35,34 @@ public class SkillManager : MonoBehaviour
             Debug.LogWarning($"SkillManager: 스킬 ID '{skillId}'를 찾을 수 없습니다.");
     }
 
-    // 장착/해제 메서드에서 호출!
+    /// <summary>
+    /// 스킬ID("skill_01"~"skill_20") → effectPrefabs[0~19] 자동 매칭
+    /// </summary>
+    public GameObject GetEffectPrefab(string skillId)
+    {
+        if (!string.IsNullOrEmpty(skillId) && skillId.StartsWith("skill_") && int.TryParse(skillId.Substring(6), out int num))
+        {
+            int idx = num - 1;
+            if (idx >= 0 && idx < effectPrefabs.Length)
+                return effectPrefabs[idx];
+        }
+        return null;
+    }
+
     public void EquipSkillToSlot(int slotIdx, string skillId)
     {
-        // 기존 슬롯에 뭔가 있었다면 제거
         string prevSkillId = inventory.equippedSkillIds[slotIdx];
         if (!string.IsNullOrEmpty(prevSkillId))
             skillDict.Remove(prevSkillId);
 
-        // 새로운 스킬 추가
         var data = inventory.GetEquipmentData(skillId);
         if (data != null)
         {
-            var skill = SkillFactory.Create(playerStats.gameObject, data);
+            var skill = SkillFactory.Create(playerStats.gameObject, data, this);
             skillDict[skillId] = skill;
         }
     }
 
-    // 필요시 전체 초기화 (예: 로딩, 세이브 불러오기 등)
     public void InitializeSkillsFromSlots()
     {
         skillDict.Clear();
