@@ -1,6 +1,6 @@
-using UnityEngine;
 using System;
 using Combat;
+using UnityEngine;
 
 namespace IdleRPG
 {
@@ -26,6 +26,10 @@ namespace IdleRPG
         [HideInInspector] public GameObject target;
         public bool isDead;
 
+        // 상태이상 관련
+        private bool isFrozen = false;
+        private float freezeTimer = 0f;
+
         public float GetAttackPower() => attackPower;
         public event Action<Monster> OnMonsterDeath;
 
@@ -39,6 +43,8 @@ namespace IdleRPG
         {
             animator.applyRootMotion = false;
             isDead = false;
+            isFrozen = false;
+            freezeTimer = 0f;
             if (animator == null)
                 animator = GetComponent<Animator>();
             SceneLinkedSMB<Monster>.Initialise(animator, this);
@@ -49,10 +55,8 @@ namespace IdleRPG
             SceneLinkedSMB<Monster>.Initialise(animator, this);
         }
 
-        // 풀에서만 호출!
         public void SetPrefabIndex(int idx) => prefabIndex = idx;
 
-        // 스테이지매니저에서 호출!
         public void ApplyStats(float maxHp, int expReward, int goldReward, float attackPower)
         {
             this.maxHp = maxHp;
@@ -91,6 +95,8 @@ namespace IdleRPG
             isDead = false;
             currentHp = maxHp;
             if (weaponCollider) weaponCollider.enabled = false;
+            isFrozen = false;
+            freezeTimer = 0f;
             gameObject.SetActive(true);
         }
 
@@ -102,5 +108,34 @@ namespace IdleRPG
         {
             if (weaponCollider) weaponCollider.enabled = false;
         }
+
+        // ----------- 상태이상 예시 (빙결 등) -----------
+        public void ApplyCrowdControl(string type, float duration)
+        {
+            if (type == "Freeze")
+            {
+                isFrozen = true;
+                freezeTimer = duration;
+                // 애니메이션 멈춤/색상 등 연출
+                if (animator) animator.speed = 0f;
+            }
+            // 필요시 다른 상태이상도 추가
+        }
+
+        private void Update()
+        {
+            if (isFrozen)
+            {
+                freezeTimer -= Time.deltaTime;
+                if (freezeTimer <= 0f)
+                {
+                    isFrozen = false;
+                    if (animator) animator.speed = 1f;
+                }
+            }
+        }
+
+        // 상태이상 체크에 따른 AI, 이동 등 중단 처리도 필요하면 이 변수 사용
+        public bool IsFrozen() => isFrozen;
     }
 }

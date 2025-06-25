@@ -24892,7 +24892,10 @@ MonoBehaviour:
   level: 1
   exp: 0
   expToLevelUp: 100
-  FinalAtkSpeed: 0
+  TempAttackBuff: 0
+  TempAtkSpeedBuff: 0
+  TempCritRateBuff: 0
+  currentHp: 0
 --- !u!4 &5834091000042434459 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2792112427403030923, guid: 5423eaa71e2039640804fdf9c3bc03ff, type: 3}

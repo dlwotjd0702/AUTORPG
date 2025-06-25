@@ -27,6 +27,7 @@ namespace Inventory
         
         public const int SkillSlotCount = 4;
         public string[] equippedSkillIds = new string[SkillSlotCount];
+        private SkillManager skillManager;
 
         private void Awake()
         {
@@ -50,6 +51,8 @@ namespace Inventory
                 var save = SaveManager.pendingSaveData;
                 if (save != null)
                     ApplyLoadedData(save);
+                
+                skillManager = FindObjectOfType<SkillManager>();
 
         }
 
@@ -369,16 +372,32 @@ namespace Inventory
 
             // 이미 다른 슬롯에 이 스킬이 박혀있으면 해당 슬롯 비우기
             for (int i = 0; i < equippedSkillIds.Length; i++)
-            {
                 if (equippedSkillIds[i] == skillId)
                     equippedSkillIds[i] = null;
-            }
 
             // 지정한 슬롯에만 장착
             equippedSkillIds[slotIdx] = skillId;
+
+            // ------ 여기서 스킬매니저도 갱신 ------
+            var skillManager = FindObjectOfType<SkillManager>();
+            if (skillManager != null)
+                skillManager.EquipSkillToSlot(slotIdx, skillId);
+
             // 필요하면 인게임 UI/슬롯 등 동기화(이벤트 호출 등)
             OnInventoryChanged?.Invoke();
         }
+
+        public List<EquipmentData> GetEquippedSkillDataList()
+        {
+            var list = new List<EquipmentData>();
+            foreach (var id in equippedSkillIds)
+            {
+                if (!string.IsNullOrEmpty(id) && dataDict.TryGetValue(id, out var data))
+                    list.Add(data);
+            }
+            return list;
+        }
+
 
         public void EnhanceSkill(string skillId)
         {

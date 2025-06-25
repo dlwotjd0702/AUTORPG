@@ -27,10 +27,19 @@ public class SkillQuickSlotUI : MonoBehaviour
         for (int i = 0; i < slotImages.Length; i++)
         {
             string skillId = inventory.equippedSkillIds[i];
-            slotImages[i].sprite = inventory.GetIcon(skillId);
-            slotImages[i].gameObject.SetActive(!string.IsNullOrEmpty(skillId));
+            if (!string.IsNullOrEmpty(skillId))
+            {
+                slotImages[i].sprite = inventory.GetIcon(skillId);
+                slotImages[i].gameObject.SetActive(true);
+            }
+            else
+            {
+                slotImages[i].sprite = null; // 혹은 emptySlotIcon 등 기본 이미지
+                slotImages[i].gameObject.SetActive(false);
+            }
         }
     }
+
 
     void OnSkillSlotClicked(int idx)
     {

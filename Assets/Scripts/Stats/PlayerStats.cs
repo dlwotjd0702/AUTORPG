@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Combat;
 using Inventory;
 using UnityEngine;
@@ -10,13 +11,11 @@ namespace Stats
         [Header("연동 시스템")]
         public InventorySystem inventory;
 
-        // 경험치/레벨
         [Header("레벨/경험치")]
         public int level = 1;
         public int exp = 0;
         public int expToLevelUp = 100;
 
-        // Base 스탯
         [Header("Base Stat(최초/강화/레벨업 모두 반영)")]
         private int baseAttack = 5;
         private float baseAtkSpeed = 1.0f;
@@ -25,17 +24,26 @@ namespace Stats
         private float baseCritRate = 0.05f;
         private float baseCritDmg = 1.5f;
 
-        // 캐싱(자동 갱신)
+        // 캐싱
         public float FinalAttack { get; private set; }
-        public float FinalAtkSpeed;
+        public float FinalAtkSpeed { get; private set; }
         public float FinalDefense { get; private set; }
         public float FinalHp { get; private set; }
         public float FinalCritRate { get; private set; }
         public float FinalCritDmg { get; private set; }
 
+        // 버프 임시 필드
+        public float TempAttackBuff = 0f;
+        public float TempAtkSpeedBuff = 0f;
+        public float TempCritRateBuff = 0f;
+
+        // 체력 (예시)
+        public float currentHp;
+
         private void Awake()
         {
             if (!inventory) inventory = GetComponent<InventorySystem>();
+            currentHp = baseHp;
         }
 
         private void Start()
@@ -44,6 +52,7 @@ namespace Stats
             if (save != null)
                 ApplyLoadedData(save);
             inventory.OnInventoryChanged += RefreshStats;
+            RefreshStats();
         }
 
         public void AddExp(int amount)
@@ -68,51 +77,41 @@ namespace Stats
             OnLevelUp?.Invoke(level);
         }
 
-        public void UpgradeAttack(int amount = 1)
-        {
-            baseAttack += amount;
-            RefreshStats();
-        }
-        public void UpgradeDefense(int amount = 1)
-        {
-            baseDefense += amount;
-            RefreshStats();
-        }
-        public void UpgradeHp(int amount = 10)
-        {
-            baseHp += amount;
-            RefreshStats();
-        }
-        public void UpgradeAtkSpeed(float amount = 0.05f)
-        {
-            baseAtkSpeed += amount;
-            RefreshStats();
-        }
-        public void UpgradeCritRate(float amount = 0.01f)
-        {
-            baseCritRate += amount;
-            RefreshStats();
-        }
-        public void UpgradeCritDmg(float amount = 0.05f)
-        {
-            baseCritDmg += amount;
-            RefreshStats();
-        }
+        public void UpgradeAttack(int amount = 1)      { baseAttack += amount; RefreshStats(); }
+        public void UpgradeDefense(int amount = 1)     { baseDefense += amount; RefreshStats(); }
+        public void UpgradeHp(int amount = 10)         { baseHp += amount; RefreshStats(); }
+        public void UpgradeAtkSpeed(float amount = 0.05f) { baseAtkSpeed += amount; RefreshStats(); }
+        public void UpgradeCritRate(float amount = 0.01f) { baseCritRate += amount; RefreshStats(); }
+        public void UpgradeCritDmg(float amount = 0.05f)  { baseCritDmg += amount; RefreshStats(); }
 
         public void RefreshStats()
         {
             var (atkMul, atkSpdMul) = inventory.GetWeaponMultipliers();
-            FinalAttack = Mathf.FloorToInt(baseAttack * atkMul);
-            FinalAtkSpeed = baseAtkSpeed * atkSpdMul;
+            FinalAttack    = Mathf.FloorToInt(baseAttack * atkMul * (1f + TempAttackBuff));
+            FinalAtkSpeed  = baseAtkSpeed * atkSpdMul * (1f + TempAtkSpeedBuff);
 
             var (defMul, hpMul) = inventory.GetArmorMultipliers();
-            FinalDefense = Mathf.FloorToInt(baseDefense * defMul);
-            FinalHp = Mathf.FloorToInt(baseHp * hpMul);
+            FinalDefense  = Mathf.FloorToInt(baseDefense * defMul);
+            FinalHp       = Mathf.FloorToInt(baseHp * hpMul);
 
             var (critRateMul, critDmgMul) = inventory.GetAccessoryMultipliers();
-            FinalCritRate = baseCritRate * critRateMul;
-            FinalCritDmg = baseCritDmg * critDmgMul;
+            FinalCritRate = baseCritRate * critRateMul + TempCritRateBuff;
+            FinalCritDmg  = baseCritDmg * critDmgMul;
 
+            // 패시브 스킬(퀵슬롯 장착만 적용) 누적
+            var passives = inventory.GetEquippedSkillDataList()
+                .FindAll(s => s.skillType == SkillType.Passive);
+            foreach (var s in passives)
+            {
+                if (s.id == "skill_05" && s.OwnedDefPercent > 0f) // 대지의 수호: 방어 20%
+                    FinalDefense += FinalDefense * s.OwnedDefPercent;
+                else if (s.id == "skill_13")
+                {
+                    FinalAttack += FinalAttack * s.OwnedAtkPercent;
+                    FinalCritRate += s.OwnedCritRatePercent;
+                }
+                // 기타 패시브도 필요하면 추가
+            }
             OnStatsChanged?.Invoke();
         }
 
@@ -135,28 +134,13 @@ namespace Stats
         public event Action OnExpChanged = delegate { };
         public event Action<int> OnLevelUp = delegate { };
 
-        // ----------- [스킬 효과 직접 적용 부분] -------------
-        public void AddPassiveSkillEffect(EquipmentData skill)
+        // ----------- 체력/회복/피해 함수 -------------
+        public void Heal(float amount)
         {
-            if (skill == null) return;
-            if (skill.skillOwnedValue != null)
-            {
-                UpgradeAttack(Mathf.RoundToInt((float)skill.skillOwnedValue));
-                UpgradeHp(Mathf.RoundToInt((float)skill.skillOwnedValue));
-            }
-
-            // 원하는 효과 추가 가능
+            currentHp = Mathf.Min(currentHp + amount, FinalHp);
+            Debug.Log($"플레이어 회복: {amount} → 현재 HP {currentHp}/{FinalHp}");
         }
-
-        public void ActivateSkill(EquipmentData skill)
-        {
-            if (skill == null) return;
-            // 실전에서 원하는 액티브 효과를 여기서 처리
-            // 예시: 체력 회복, 공격력 버프 등
-            Debug.Log($"액티브 스킬 [{skill.name}] 발동! 효과치: {skill.skillPower}");
-            // 필요시 직접 스탯에 적용:
-            // UpgradeHp(Mathf.RoundToInt(skill.skillPower));
-        }
+    
 
         public void ResetAllUpgrades()
         {
