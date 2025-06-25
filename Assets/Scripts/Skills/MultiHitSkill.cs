@@ -29,7 +29,7 @@ public class MultiHitSkill : SkillBase
                 target.TakeDamage(dmg);
                 Debug.Log($"[연속 공격 {i + 1}/{hitCount}] {dmg} 데미지");
             }
-            yield return new WaitForSeconds(0.2f); // 타격 간격
+            yield return new WaitForSeconds(0.1f); // 타격 간격
         }
     }
 }
