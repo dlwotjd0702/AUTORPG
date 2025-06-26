@@ -21,7 +21,7 @@ namespace Stats
         private float baseAtkSpeed = 1.0f;
         private int baseDefense = 0;
         private int baseHp = 1000;
-        private float baseCritRate = 0.05f;
+        private float baseCritRate = 0.1f;
         private float baseCritDmg = 1.5f;
 
         // 캐싱
@@ -148,8 +148,23 @@ namespace Stats
             baseAtkSpeed = 1.0f;
             baseDefense = 0;
             baseHp = 1000;
-            baseCritRate = 0.05f;
+            baseCritRate = 0.1f;
             baseCritDmg = 1.5f;
+        }
+        
+        public int CombatPower
+        {
+            get
+            {
+                float power =
+                    FinalAttack * 2f +
+                    FinalDefense * 1.5f +
+                    FinalHp * 0.2f +
+                    FinalAtkSpeed * 50f +
+                    FinalCritRate * 1000f +
+                    FinalCritDmg * 200f;
+                return Mathf.FloorToInt(power);
+            }
         }
     }
 }

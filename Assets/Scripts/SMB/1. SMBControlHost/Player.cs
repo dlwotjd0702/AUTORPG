@@ -30,7 +30,7 @@ namespace IdleRPG
         public float FinalDefense => playerStats.FinalDefense;
         public float FinalCritRate => playerStats.FinalCritRate;
         public float FinalCritDmg => playerStats.FinalCritDmg;
-
+        private HPBarUI hpBarUI;
         void Awake()
         {
             if (!animator) animator = GetComponent<Animator>();
@@ -51,12 +51,19 @@ namespace IdleRPG
             playerStats.OnStatsChanged += ApplyStatsToPlayer;
             playerStats.RefreshStats();
             currentHp = MaxHp;
+            hpBarUI = HPBarUIPool.Instance.Spawn(this.transform, currentHp, MaxHp);
+            if (hpBarUI != null)hpBarUI.SetColor(true);
         }
 
      
 
         void OnDisable()
         {
+            if (hpBarUI != null)
+            {
+                hpBarUI.SetColor(false);
+                hpBarUI.Release();
+            }
             playerStats.OnStatsChanged -= ApplyStatsToPlayer;
         }
 
@@ -69,14 +76,19 @@ namespace IdleRPG
             currentHp += (FinalHp - MaxHp);
             MaxHp = FinalHp;
             if (currentHp > MaxHp) currentHp = MaxHp;
+            if (hpBarUI != null)hpBarUI.SetHP(currentHp, MaxHp);
         }
-
-        public void TakeDamage(float amount)
+        
+        public void TakeDamage(float amount, bool isCritical = false)
         {
             float damage = Mathf.Max(amount - playerStats.FinalDefense, 1);
             currentHp -= damage;
+            if (hpBarUI != null)
+                hpBarUI.SetHP(currentHp, MaxHp);
+            
             if (currentHp <= 0)
             {
+                if (hpBarUI != null) hpBarUI.Release();
                 currentHp = 0;
                 animator.CrossFade("Death", 0.05f);
                 Deathmotion();

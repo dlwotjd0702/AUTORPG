@@ -8,7 +8,7 @@ namespace IdleRPG
     {
         protected TMonoBehaviour tMonoBehaviour;
         bool p_FirstFrameHappened;
-        bool p_LastFrameHappened;
+       
 
         public static void Initialise(Animator animator, TMonoBehaviour monoBehaviour)
         {
@@ -50,7 +50,7 @@ namespace IdleRPG
 
         public sealed override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex, AnimatorControllerPlayable controller)
         {
-            p_LastFrameHappened = false;
+          
             OnSLStateExit(animator, stateInfo, layerIndex);
         }
 

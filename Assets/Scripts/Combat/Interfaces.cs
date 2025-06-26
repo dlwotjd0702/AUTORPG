@@ -2,7 +2,7 @@ namespace Combat
 {
     public interface IDamageable
     {
-        void TakeDamage(float amount);
+        void TakeDamage(float amount, bool isCritical = false);
     }
     
     public interface IAttackStat

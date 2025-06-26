@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using Stats;
 
 public class BuffSkill : SkillBase
 {
@@ -21,7 +20,10 @@ public class BuffSkill : SkillBase
         // 이펙트 (플레이어 머리 위)
         var effect = skillManager.GetEffectPrefab(Data.id);
         if (effect)
-            Object.Instantiate(effect, playerStats.transform.position + Vector3.up * 1.5f, Quaternion.identity);
+        {
+            var go = Object.Instantiate(effect, playerStats.transform.position + new Vector3(0, 2f, 0), Quaternion.identity);
+            go.transform.SetParent(playerStats.transform);
+        }
     }
 
     private IEnumerator BuffRoutine()
@@ -29,6 +31,7 @@ public class BuffSkill : SkillBase
         ApplyBuff(true);
         yield return new WaitForSeconds(duration);
         ApplyBuff(false);
+        
     }
 
     private void ApplyBuff(bool apply)

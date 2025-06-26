@@ -1,5 +1,6 @@
 using Combat;
 using UnityEngine;
+using Stats; // PlayerStats 네임스페이스가 이거면 추가
 
 namespace IdleRPG
 {
@@ -14,22 +15,31 @@ namespace IdleRPG
                 return;
 
             // --- 플레이어 무기: 몬스터만 공격 ---
-            if (owner is Player)
+            if (owner is Player player)
             {
                 var monster = other.GetComponent<Monster>();
                 if (monster != null)
                 {
-                    float curDamage = (owner as IAttackStat)?.GetAttackPower() ?? 0f;
-                    monster.TakeDamage(curDamage);
+                    var playerStats = player.GetComponent<PlayerStats>();
+                    if (playerStats == null)
+                        return;
+
+                    // --- 크리티컬 판정 ---
+                    bool isCritical = Random.value < playerStats.FinalCritRate;
+                    float damage = playerStats.FinalAttack;
+                    if (isCritical)
+                        damage *= playerStats.FinalCritDmg;
+
+                    monster.TakeDamage(damage, isCritical);
                 }
             }
             // --- 몬스터 무기: 플레이어만 공격 ---
-            else if (owner is Monster)
+            else if (owner is Monster monster)
             {
-                var player = other.GetComponent<Player>();
+                player = other.GetComponent<Player>();
                 if (player != null)
                 {
-                    float curDamage = (owner as IAttackStat)?.GetAttackPower() ?? 0f;
+                    float curDamage = (monster as IAttackStat)?.GetAttackPower() ?? 0f;
                     player.TakeDamage(curDamage);
                 }
             }

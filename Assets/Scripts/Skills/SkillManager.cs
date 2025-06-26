@@ -8,8 +8,8 @@ public class SkillManager : MonoBehaviour
     public InventorySystem inventory;
     public PlayerStats playerStats;
 
-    // 🟢 skill_01 ~ skill_20을 순서대로 드래그 (0 = skill_01, 19 = skill_20)
-    public GameObject[] effectPrefabs = new GameObject[20];
+    // Inspector에서 순서대로 skill_01~skill_20(0~19), skill_21(20) 드래그!
+    public GameObject[] effectPrefabs = new GameObject[21];
 
     // 현재 장착된 스킬만 관리
     public Dictionary<string, SkillBase> skillDict = new();
@@ -35,9 +35,7 @@ public class SkillManager : MonoBehaviour
             Debug.LogWarning($"SkillManager: 스킬 ID '{skillId}'를 찾을 수 없습니다.");
     }
 
-    /// <summary>
-    /// 스킬ID("skill_01"~"skill_20") → effectPrefabs[0~19] 자동 매칭
-    /// </summary>
+    // 스킬ID("skill_01"~"skill_20") → effectPrefabs[0~19], skill_21은 20
     public GameObject GetEffectPrefab(string skillId)
     {
         if (!string.IsNullOrEmpty(skillId) && skillId.StartsWith("skill_") && int.TryParse(skillId.Substring(6), out int num))

@@ -25,7 +25,7 @@ namespace Inventory
         // 아이콘 테이블 (SO)
         public EquipmentIconTableSO iconTableSO;
         
-        public const int SkillSlotCount = 4;
+        public const int SkillSlotCount = 6;
         public string[] equippedSkillIds = new string[SkillSlotCount];
         private SkillManager skillManager;
 

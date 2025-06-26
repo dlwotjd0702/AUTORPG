@@ -25,7 +25,7 @@ namespace IdleRPG
         [HideInInspector] public bool isMoving = false;
         [HideInInspector] public GameObject target;
         public bool isDead;
-
+        private HPBarUI hpBarUI;
         // 상태이상 관련
         private bool isFrozen = false;
         private float freezeTimer = 0f;
@@ -64,14 +64,22 @@ namespace IdleRPG
             this.expReward = expReward;
             this.goldReward = goldReward;
             this.attackPower = attackPower;
+            hpBarUI = HPBarUIPool.Instance.Spawn(this.transform, currentHp, maxHp);
+            hpBarUI.SetHP(currentHp, maxHp);
         }
 
-        public void TakeDamage(float amount)
+        public void TakeDamage(float amount, bool isCritical = false)
         {
             currentHp -= amount;
+            Vector3 pos = transform.position + Vector3.up * 2f;
+            Color textColor = isCritical ? Color.yellow : Color.white;
+            DamageText3DPool.Instance.Spawn(pos, (int)amount, textColor);
+            if (hpBarUI != null)
+                hpBarUI.SetHP(currentHp, maxHp);
             if (currentHp <= 0 && !isDead)
             {
                 currentHp = 0;
+                if (hpBarUI != null) hpBarUI.Release();
                 animator.CrossFade("Death", 0.05f);
                 Deathmotion();
             }
@@ -135,7 +143,5 @@ namespace IdleRPG
             }
         }
 
-        // 상태이상 체크에 따른 AI, 이동 등 중단 처리도 필요하면 이 변수 사용
-        public bool IsFrozen() => isFrozen;
     }
 }

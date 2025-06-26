@@ -1,22 +1,23 @@
 using IdleRPG;
-using Stats;
 using UnityEngine;
+using Stats;
 
 public abstract class SkillBase
 {
     public EquipmentData Data { get; private set; }
-    protected PlayerStats playerStats;
-    protected SkillManager skillManager;
     protected float cooldownTimer;
+    public float CooldownTimer => cooldownTimer;
+    public SkillManager skillManager;
+    public PlayerStats playerStats;
 
     public SkillBase(EquipmentData data, SkillManager manager)
     {
         Data = data;
+        cooldownTimer = 0f;
         skillManager = manager;
     }
 
     public void SetOwner(PlayerStats stats) => playerStats = stats;
-
     public bool IsReady() => cooldownTimer <= 0f;
 
     public void UpdateCooldown(float deltaTime)
