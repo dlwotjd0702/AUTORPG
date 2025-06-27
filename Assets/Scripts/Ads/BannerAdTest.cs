@@ -7,13 +7,11 @@ public class BannerAdTest : MonoBehaviour
 
     void Start()
     {
-        // 공식 테스트 배너 광고 단위 ID
-        string adUnitId = "ca-app-pub-3940256099942544/6300978111";
+        string adUnitId = "ca-app-pub-3940256099942544/6300978111"; // 테스트 배너 ID
 
-        // 화면 하단에 배너 생성
-        bannerView = new BannerView(adUnitId, AdSize.Banner, AdPosition.Bottom);
+        // ⭐️ AdPosition.TopLeft로 설정!
+        bannerView = new BannerView(adUnitId, AdSize.Banner, AdPosition.TopLeft);
 
-        // 광고 요청 생성
         AdRequest request = new AdRequest();
         bannerView.LoadAd(request);
     }
