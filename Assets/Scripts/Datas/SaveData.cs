@@ -33,6 +33,8 @@ public class SaveData
     [FirestoreProperty] public string nickname { get; set; }
     
     [FirestoreProperty] public List<string> equippedSkillIds { get; set; } = new List<string>();
+    
+    [FirestoreProperty] public int gems { get; set; } 
 
     // 저장 시점 기록 (이 메서드는 그대로 사용 가능)
     public void SetSaveTime()

@@ -1311,6 +1311,9 @@ GameObject:
   - component: {fileID: 2792112427403030923}
   - component: {fileID: 916637999024525865}
   - component: {fileID: 1550720998823394394}
+  - component: {fileID: 7656603226391870486}
+  - component: {fileID: 4622378517426347431}
+  - component: {fileID: 864305292213006000}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -1373,14 +1376,86 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 5
   attackRange: 2
-  attackCooldown: 1
-  maxHp: 10
   animator: {fileID: 916637999024525865}
   weaponCollider: {fileID: 7021614961288870296}
+  playerStats: {fileID: 864305292213006000}
+  isDead: 0
   currentHp: 0
+  MaxHp: 0
   isAttacking: 0
   isMoving: 0
   target: {fileID: 0}
+--- !u!136 &7656603226391870486
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1317236468811589255}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.18
+  m_Height: 1.95
+  m_Direction: 1
+  m_Center: {x: 0, y: 1, z: 0}
+--- !u!54 &4622378517426347431
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1317236468811589255}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 80
+  m_CollisionDetection: 0
+--- !u!114 &864305292213006000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1317236468811589255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e9458e0b310443bad81e491191aa4ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventory: {fileID: 0}
+  level: 1
+  exp: 0
+  expToLevelUp: 100
+  TempAttackBuff: 0
+  adAttackBuff: 0
+  TempAtkSpeedBuff: 0
+  TempCritRateBuff: 0
+  currentHp: 0
 --- !u!1 &1337492457359602842
 GameObject:
   m_ObjectHideFlags: 0
@@ -2820,7 +2895,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1698827811216717842
 Transform:
   m_ObjectHideFlags: 0
@@ -5030,6 +5105,7 @@ GameObject:
   - component: {fileID: 3696668574509898205}
   - component: {fileID: 946331452663254133}
   - component: {fileID: 7021614961288870296}
+  - component: {fileID: 1221801897597203654}
   m_Layer: 0
   m_Name: SM_ROCA_SWORD
   m_TagString: Untagged
@@ -5117,13 +5193,26 @@ MeshCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -5131286536865066899, guid: 4940fea5a3ea7da498f8d68156acd053, type: 3}
+--- !u!114 &1221801897597203654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4775038989582838285}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7af11a0008aaf2e41b3bf74094bef1af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  owner: {fileID: 1550720998823394394}
 --- !u!1 &4907338172625720275
 GameObject:
   m_ObjectHideFlags: 0

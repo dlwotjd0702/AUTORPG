@@ -45,6 +45,16 @@ public class SaveManager : MonoBehaviour
 
         FirebaseManager.Instance.SaveGame(data, (success) => {
             Debug.Log(success ? "저장 완료" : "저장 실패");
+            if (success)
+            {
+                // ★ 랭킹도 같이 갱신
+                FirebaseManager.Instance.SaveRanking(
+                    data.nickname,
+                    data.maxClearedStage,
+                    data.maxClearedWave,
+                    (rankOk) => Debug.Log(rankOk ? "랭킹 저장 완료" : "랭킹 저장 실패")
+                );
+            }
         });
     }
 
