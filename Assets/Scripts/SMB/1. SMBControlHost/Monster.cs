@@ -64,7 +64,7 @@ namespace IdleRPG
             this.expReward = expReward;
             this.goldReward = goldReward;
             this.attackPower = attackPower;
-            hpBarUI = HPBarUIPool.Instance.Spawn(this.transform, currentHp, maxHp);
+            hpBarUI = HPBarUIPool.Instance.Spawn(gameObject, currentHp, maxHp);
             hpBarUI.SetHP(currentHp, maxHp);
         }
 

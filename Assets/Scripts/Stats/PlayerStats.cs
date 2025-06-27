@@ -34,6 +34,7 @@ namespace Stats
 
         // 버프 임시 필드
         public float TempAttackBuff = 0f;
+        public float adAttackBuff = 0f;
         public float TempAtkSpeedBuff = 0f;
         public float TempCritRateBuff = 0f;
 
@@ -87,7 +88,8 @@ namespace Stats
         public void RefreshStats()
         {
             var (atkMul, atkSpdMul) = inventory.GetWeaponMultipliers();
-            FinalAttack    = Mathf.FloorToInt(baseAttack * atkMul * (1f + TempAttackBuff));
+            adAttackBuff = AdBuffManager.Instance != null && AdBuffManager.Instance.AttackBuffActive ? 1.0f : 0f;
+            FinalAttack = Mathf.FloorToInt(baseAttack * atkMul * (1f + TempAttackBuff + adAttackBuff));
             FinalAtkSpeed  = baseAtkSpeed * atkSpdMul * (1f + TempAtkSpeedBuff);
 
             var (defMul, hpMul) = inventory.GetArmorMultipliers();

@@ -51,7 +51,7 @@ namespace IdleRPG
             playerStats.OnStatsChanged += ApplyStatsToPlayer;
             playerStats.RefreshStats();
             currentHp = MaxHp;
-            hpBarUI = HPBarUIPool.Instance.Spawn(this.transform, currentHp, MaxHp);
+            hpBarUI = HPBarUIPool.Instance.Spawn(gameObject, currentHp, MaxHp);
             if (hpBarUI != null)hpBarUI.SetColor(true);
         }
 

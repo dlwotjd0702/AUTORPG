@@ -25,7 +25,7 @@ public class HPBarUIPool : MonoBehaviour
         pool.Enqueue(obj);
     }
 
-    public HPBarUI Spawn(Transform target, float currentHp, float maxHp)
+    public HPBarUI Spawn(GameObject target, float currentHp, float maxHp)
     {
         if (pool.Count == 0) AddNew();
         var obj = pool.Dequeue();

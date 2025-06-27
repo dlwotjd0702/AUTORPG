@@ -443,6 +443,19 @@ namespace Inventory
                     }
                 }
             }
+
+            // --- [스킬 퀵슬롯 정보 복원] ---
+            if (data.equippedSkillIds != null && data.equippedSkillIds.Count > 0)
+            {
+                for (int i = 0; i < equippedSkillIds.Length; i++)
+                    equippedSkillIds[i] = (i < data.equippedSkillIds.Count) ? data.equippedSkillIds[i] : null;
+            }
+
+            // --- [스킬매니저 슬롯 연동 동기화] ---
+            var skillManager = FindObjectOfType<SkillManager>();
+            if (skillManager != null)
+                skillManager.InitializeSkillsFromSlots();
+
             OnInventoryChanged?.Invoke();
         }
 
@@ -464,6 +477,9 @@ namespace Inventory
                     });
                 }
             }
+
+            // --- [스킬 퀵슬롯 정보 저장] ---
+            data.equippedSkillIds = new List<string>(equippedSkillIds);
         }
         
     }

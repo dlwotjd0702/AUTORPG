@@ -142,7 +142,10 @@ namespace Stats
 
         public void AddGold(int amount)
         {
-            gold += amount;
+            int finalAmount = amount;
+            if (AdBuffManager.Instance != null && AdBuffManager.Instance.GoldBuffActive)
+                finalAmount *= 2;
+            gold += finalAmount;
             OnGoldChanged.Invoke();
         }
 
