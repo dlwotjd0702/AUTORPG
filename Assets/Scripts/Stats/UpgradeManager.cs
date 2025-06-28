@@ -1,5 +1,6 @@
 using System;
 using Combat;
+using TMPro;
 using UnityEngine;
 
 namespace Stats
@@ -9,7 +10,7 @@ namespace Stats
         [Header("골드 및 연동")]
         public int gold = 0;
         public PlayerStats playerStats;
-
+        public TextMeshProUGUI goldText;
         [Header("강화 단계 (각 스탯별)")]
         [SerializeField] public int atkUpgradeLevel = 0;
         [SerializeField] public int defUpgradeLevel = 0;
@@ -50,7 +51,16 @@ namespace Stats
             var save = SaveManager.pendingSaveData;
             if (save != null)
                 ApplyLoadedData(save);
+            
+            OnGoldChanged += UpdateGoldText;
+            UpdateGoldText();
         }
+        void UpdateGoldText()
+        {
+            if (goldText != null)
+                goldText.text = $"Gold: {gold:N0}";
+        }
+
 
         public int GetDropRateUpgradeCost()
         {

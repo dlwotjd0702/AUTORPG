@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.Purchasing; // IAP 네임스페이스!
+using Unity.Services.Core;    // UGS 네임스페이스
+using System.Threading.Tasks; // Task
 
 public class GemShopIAP : MonoBehaviour, IStoreListener
 {
@@ -9,8 +11,12 @@ public class GemShopIAP : MonoBehaviour, IStoreListener
 
     public const string PRODUCT_100_GEM = "test_gem_100";
 
-    void Start()
+    // Start를 async로 변경
+    async void Start()
     {
+        await UnityServices.InitializeAsync(); // UGS 먼저 초기화
+        Debug.Log("Unity Gaming Services Initialized!");
+
         if (storeController == null)
         {
             var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());

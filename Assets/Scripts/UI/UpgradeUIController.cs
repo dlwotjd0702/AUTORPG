@@ -9,8 +9,7 @@ namespace Stats
         [Header("연동 매니저")]
         public UpgradeManager upgradeManager;
 
-        [Header("골드 표시")]
-        public TextMeshProUGUI goldText;
+        
 
         [Header("공격력 강화")]
         public TextMeshProUGUI atkCostText;
@@ -55,14 +54,14 @@ namespace Stats
 
         void RefreshUI()
         {
-            goldText.text         = $"GOLD : {upgradeManager.gold}";
-            atkCostText.text      = $"Attack {upgradeManager.atkUpgradeLevel}Level 비용: {upgradeManager.GetAttackUpgradeCost()}";
-            defCostText.text      = $"Defense {upgradeManager.defUpgradeLevel}Level 비용: {upgradeManager.GetDefenseUpgradeCost()}";
-            hpCostText.text       = $"Hp {upgradeManager.hpUpgradeLevel}Level 비용: {upgradeManager.GetHpUpgradeCost()}";
-            atkSpdCostText.text   = $"AtkSpd {upgradeManager.atkSpdUpgradeLevel}Level 비용: {upgradeManager.GetAtkSpdUpgradeCost()}";
-            critRateCostText.text = $"CritRate {upgradeManager.critRateUpgradeLevel}Level 비용: {upgradeManager.GetCritRateUpgradeCost()}";
-            critDmgCostText.text  = $"CritDmg {upgradeManager.critDmgUpgradeLevel}Level 비용: {upgradeManager.GetCritDmgUpgradeCost()}";
-            dropRateCostText.text     = $"드랍률: {upgradeManager.GetCurrentDropRate() * 100f:F1} 비용: {upgradeManager.GetDropRateUpgradeCost()}";
+            
+            atkCostText.text      = $"Attack {upgradeManager.atkUpgradeLevel}Level 비용: {upgradeManager.GetAttackUpgradeCost()}gold";
+            defCostText.text      = $"Defense {upgradeManager.defUpgradeLevel}Level 비용: {upgradeManager.GetDefenseUpgradeCost()}gold";
+            hpCostText.text       = $"Hp {upgradeManager.hpUpgradeLevel}Level 비용: {upgradeManager.GetHpUpgradeCost()}gold";
+            atkSpdCostText.text   = $"AtkSpd {upgradeManager.atkSpdUpgradeLevel}Level 비용: {upgradeManager.GetAtkSpdUpgradeCost()}gold";
+            critRateCostText.text = $"CritRate {upgradeManager.critRateUpgradeLevel}Level 비용: {upgradeManager.GetCritRateUpgradeCost()}gold";
+            critDmgCostText.text  = $"CritDmg {upgradeManager.critDmgUpgradeLevel}Level 비용: {upgradeManager.GetCritDmgUpgradeCost()}gold";
+            dropRateCostText.text     = $"드랍률: {upgradeManager.GetCurrentDropRate() * 100f:F1} 비용: {upgradeManager.GetDropRateUpgradeCost()}gold";
       
         }
 
