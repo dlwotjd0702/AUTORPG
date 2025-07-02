@@ -17,7 +17,6 @@ public class StageManager : MonoBehaviour, ISaveable
     public int currentStage = 1;
     public int currentWave = 1;
     public int monstersPerWave = 8;
-    public int maxStage = 10;
     public int maxWavePerStage = 10;
 
     public int maxClearedStage = 1;
@@ -25,7 +24,6 @@ public class StageManager : MonoBehaviour, ISaveable
     public List<StageWaveRecord> clearedStageWave = new List<StageWaveRecord>();
 
     public StageProgressMode progressMode = StageProgressMode.Advance;
-    private int monstersAlive;
 
     [Header("몬스터 기본 스탯(1마리 기준)")]
     public float baseMaxHp = 10f;
@@ -38,6 +36,10 @@ public class StageManager : MonoBehaviour, ISaveable
     public Button prevWaveButton;
     public Button toggleModeButton;
     public TextMeshProUGUI progressModeText;
+
+    [Header("스테이지 플레인/매터리얼")]
+    public GameObject stagePlane;             // 드래그 연결
+    public Material[] stageMaterials;         // 10개 드래그 연결
 
     void Start()
     {
@@ -74,6 +76,23 @@ public class StageManager : MonoBehaviour, ISaveable
         int expReward  = Mathf.RoundToInt(baseExp * expMultiplier);
         float atk      = baseAttack * attackMultiplier;
 
+        // ----- 플레인/매터리얼 적용 -----
+        if (stagePlane != null)
+        {
+            stagePlane.transform.localScale = new Vector3(100, 1, 100);
+
+            if (stageMaterials != null && stageMaterials.Length > 0)
+            {
+                int matIdx = (currentStage - 1) % stageMaterials.Length; // 0~9 반복
+                var renderer = stagePlane.GetComponent<Renderer>();
+                if (renderer != null)
+                {
+                    renderer.material = stageMaterials[matIdx];
+                    renderer.material.mainTextureScale = new Vector2(40, 40); // 타일링 조절(40x40 반복)
+                }
+            }
+        }
+
         for (int i = 0; i < monstersPerWave; i++)
         {
             float angle = i * Mathf.PI * 2 / monstersPerWave;
@@ -95,7 +114,6 @@ public class StageManager : MonoBehaviour, ISaveable
         monster.OnMonsterDeath -= OnMonsterDeath;
         monsterPool.ReturnToPool(monster);
 
-        // 모든 몬스터가 죽었는지 풀 기준으로 판정
         if (!monsterPool.HasAliveMonster())
         {
             if (!clearedStageWave.Any(x => x.stage == currentStage && x.wave == currentWave))
@@ -116,7 +134,6 @@ public class StageManager : MonoBehaviour, ISaveable
 
     public void OnNextWaveButton()
     {
-        // 버튼에서는 반드시 클리어 조건 체크!
         if (!clearedStageWave.Any(x => x.stage == currentStage && x.wave == currentWave))
         {
             Debug.Log("이전 웨이브를 클리어해야 다음 웨이브로 넘어갈 수 있습니다.");
@@ -133,8 +150,7 @@ public class StageManager : MonoBehaviour, ISaveable
         if (currentWave >= maxWavePerStage)
         {
             nextWave = 1;
-            nextStage++;
-            if (nextStage > maxStage) nextStage = maxStage;
+            nextStage++; // ★ 무한 스테이지
         }
         else
         {
@@ -146,10 +162,8 @@ public class StageManager : MonoBehaviour, ISaveable
         StartWave();
     }
 
-
     public void PrevWave()
     {
-        // 살아있는 몬스터가 있어도 이전 웨이브로 이동 허용
         if (currentWave > 1)
         {
             currentWave--;
@@ -178,7 +192,7 @@ public class StageManager : MonoBehaviour, ISaveable
     private void UpdateProgressModeText()
     {
         if (progressModeText)
-            progressModeText.text = $"{currentStage} 스테이지 {currentWave}/10 Wave \n모드: {(progressMode == StageProgressMode.Advance ? "돌파" : "반복")}";
+            progressModeText.text = $"{currentStage} 스테이지 {currentWave}/{maxWavePerStage} Wave \n모드: {(progressMode == StageProgressMode.Advance ? "돌파" : "반복")}";
     }
 
     public void OnPlayerDied()
@@ -200,8 +214,6 @@ public class StageManager : MonoBehaviour, ISaveable
         }
         StartWave();
     }
-
-    
 
     public void OnPrevWaveButton() => PrevWave();
 

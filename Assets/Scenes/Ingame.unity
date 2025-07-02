@@ -7613,7 +7613,6 @@ MonoBehaviour:
   currentStage: 1
   currentWave: 1
   monstersPerWave: 5
-  maxStage: 10
   maxWavePerStage: 10
   maxClearedStage: 1
   maxClearedWave: 1
@@ -7626,6 +7625,18 @@ MonoBehaviour:
   prevWaveButton: {fileID: 476117508}
   toggleModeButton: {fileID: 366307876}
   progressModeText: {fileID: 1182950200}
+  stagePlane: {fileID: 788470674}
+  stageMaterials:
+  - {fileID: 2100000, guid: 6cd8d1ec86714d848883cb3c10592c98, type: 2}
+  - {fileID: 2100000, guid: 16b688ed7a506b448a8321fc28f212a8, type: 2}
+  - {fileID: 2100000, guid: 9ce5d24bf2981184795a887bae02e666, type: 2}
+  - {fileID: 2100000, guid: ce1ddd8e466bcef44937c4f1ee17b988, type: 2}
+  - {fileID: 2100000, guid: e1aa90f7c1407eb4aa2743ca2f17204f, type: 2}
+  - {fileID: 2100000, guid: 2a5063f82560cc34eb018f14c00a2338, type: 2}
+  - {fileID: 2100000, guid: 087bef098ce39294db0ac97db2e8e819, type: 2}
+  - {fileID: 2100000, guid: 12b847f4b72a2c34c8b908e75259796d, type: 2}
+  - {fileID: 2100000, guid: cd2fcf1a363840643b65aaa5c377bdb0, type: 2}
+  - {fileID: 2100000, guid: 22de20f0a31256849ae199f8464e20b4, type: 2}
 --- !u!4 &632207144
 Transform:
   m_ObjectHideFlags: 0
