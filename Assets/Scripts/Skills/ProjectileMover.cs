@@ -29,15 +29,15 @@ public class ProjectileMover : MonoBehaviour
 
         if (Vector3.Distance(transform.position, target.position) < 0.4f)
         {
-            // 도착시 히트 이펙트 생성
+            // 도착시 히트 이펙트 생성 (2초 뒤에만 이펙트 파괴)
             if (hitEffectPrefab != null)
             {
                 var effect = Object.Instantiate(hitEffectPrefab, target.position, Quaternion.identity);
-                Destroy(effect, hitEffectDestroyDelay); // 2초 뒤에 이펙트만 파괴
+                Destroy(effect, hitEffectDestroyDelay);
             }
 
             onHit?.Invoke();
-            Destroy(gameObject, hitEffectDestroyDelay); // ★ 2초 뒤에 발사체 오브젝트도 파괴
+            Destroy(gameObject); // 투사체는 즉시 파괴!
         }
     }
 }
