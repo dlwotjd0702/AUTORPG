@@ -1,7 +1,7 @@
 using UnityEngine;
 using TMPro;
 
-public class DamageText3D : MonoBehaviour
+public class FloatingText3D : MonoBehaviour
 {
     public TextMeshPro text;
     public float floatSpeed = 2f;
@@ -55,6 +55,6 @@ public class DamageText3D : MonoBehaviour
         text.color = originColor;
         // text.fontSize = 원래값; // 크리티컬일 때만 조절 필요
         gameObject.SetActive(false);
-        DamageText3DPool.Instance.Return(this);
+        FloatingText3DPool.Instance.Return(this);
     }
 }

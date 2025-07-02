@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DamageText3DPool : MonoBehaviour
+public class FloatingText3DPool : MonoBehaviour
 {
-    public static DamageText3DPool Instance { get; private set; }
-    public DamageText3D prefab;
+    public static FloatingText3DPool Instance { get; private set; }
+    public FloatingText3D prefab;
     public int poolSize = 20;
 
-    private Queue<DamageText3D> pool = new Queue<DamageText3D>();
+    private Queue<FloatingText3D> pool = new Queue<FloatingText3D>();
 
     void Awake()
     {
@@ -25,7 +25,7 @@ public class DamageText3DPool : MonoBehaviour
         pool.Enqueue(obj);
     }
 
-    public DamageText3D Spawn(Vector3 worldPos, int amount, Color color/*, bool isCritical = false*/)
+    public FloatingText3D Spawn(Vector3 worldPos, int amount, Color color/*, bool isCritical = false*/)
     {
         if (pool.Count == 0) AddNew();
         var obj = pool.Dequeue();
@@ -34,7 +34,7 @@ public class DamageText3DPool : MonoBehaviour
         return obj;
     }
 
-    public void Return(DamageText3D dt)
+    public void Return(FloatingText3D dt)
     {
         dt.gameObject.SetActive(false);
         pool.Enqueue(dt);

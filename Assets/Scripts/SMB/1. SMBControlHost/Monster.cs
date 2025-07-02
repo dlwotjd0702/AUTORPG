@@ -73,7 +73,7 @@ namespace IdleRPG
             currentHp -= amount;
             Vector3 pos = transform.position + Vector3.up * 2f;
             Color textColor = isCritical ? Color.yellow : Color.white;
-            DamageText3DPool.Instance.Spawn(pos, (int)amount, textColor);
+            FloatingText3DPool.Instance.Spawn(pos, (int)amount, textColor);
             if (hpBarUI != null)
                 hpBarUI.SetHP(currentHp, maxHp);
             if (currentHp <= 0 && !isDead)

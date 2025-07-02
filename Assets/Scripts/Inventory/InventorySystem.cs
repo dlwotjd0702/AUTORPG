@@ -12,7 +12,7 @@ using UnityEngine.Networking;
 namespace Inventory
 {
     [DefaultExecutionOrder(-100)]
-    [System.Serializable]
+    [Serializable]
     public class InventorySystem : MonoBehaviour, ISaveable
     {
         public int slotCount = 100;
@@ -20,7 +20,7 @@ namespace Inventory
         public event Action OnInventoryChanged;
         // TSV 데이터 (도감)
         public List<EquipmentData> dataList = new List<EquipmentData>();
-        public Dictionary<string, EquipmentData> dataDict = new Dictionary<string, EquipmentData>();
+        public Dictionary<string, EquipmentData> DataDict = new Dictionary<string, EquipmentData>();
 
         // 아이콘 테이블 (SO)
         public EquipmentIconTableSO iconTableSO;
@@ -38,11 +38,11 @@ namespace Inventory
 
             // TSV 파싱 (CsvHelper 사용)
             string path = Path.Combine(Application.streamingAssetsPath, "equipment.tsv");
-            dataList = LoadFromTSVWithCsvHelper(path);
+            dataList = LoadFromTsvWithCsvHelper(path);
 
-            dataDict.Clear();
+            DataDict.Clear();
             foreach (var data in dataList)
-                dataDict[data.id] = data;
+                DataDict[data.id] = data;
         }
 
         private void Start()
@@ -56,7 +56,7 @@ namespace Inventory
 
         }
 
-        public List<EquipmentData> LoadFromTSVWithCsvHelper(string path)
+        public List<EquipmentData> LoadFromTsvWithCsvHelper(string path)
         {
             var list = new List<EquipmentData>();
             var config = new CsvConfiguration(CultureInfo.InvariantCulture);
@@ -110,7 +110,7 @@ namespace Inventory
 
         public EquipmentData GetEquipmentData(string id)
         {
-            dataDict.TryGetValue(id, out var data);
+            DataDict.TryGetValue(id, out var data);
             return data;
         }
         public Sprite GetIcon(string id)
@@ -392,7 +392,7 @@ namespace Inventory
             var list = new List<EquipmentData>();
             foreach (var id in equippedSkillIds)
             {
-                if (!string.IsNullOrEmpty(id) && dataDict.TryGetValue(id, out var data))
+                if (!string.IsNullOrEmpty(id) && DataDict.TryGetValue(id, out var data))
                     list.Add(data);
             }
             return list;
