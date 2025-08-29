@@ -1,11 +1,12 @@
 using Combat;
+using TMPro;
 using UnityEngine;
 
 public class PlayerGemManager : MonoBehaviour, ISaveable
 {
     public int Gems = 100000;
 
-    public TMPro.TextMeshProUGUI gemText; // UI에 연결
+    public TextMeshProUGUI gemText; // UI에 연결
 
     private void Start()
     {

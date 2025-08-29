@@ -1,6 +1,7 @@
 using GoogleMobileAds.Api;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public enum AdBuffType { Attack, Speed, Gold }
 
@@ -20,19 +21,22 @@ public class AdBuffManager : MonoBehaviour
 
     private const float BUFF_DURATION = 300f; // 5분
 
-    // UI: 광고버프 버튼(순서대로 연결) / 플레이어 스탯 참조
+    // UI: 광고버프 버튼/플레이어 스탯
     public Button[] buffButtons; // 0:공격력, 1:배속, 2:골드
-    public Stats.PlayerStats playerStats; // 드래그로 연결
+    public Stats.PlayerStats playerStats;
+
+    // ★ 버프 남은시간 표시 TMP 텍스트 (드래그로 각각 연결)
+    public TextMeshProUGUI attackBuffTimeText;
+    public TextMeshProUGUI speedBuffTimeText;
+    public TextMeshProUGUI goldBuffTimeText;
 
     // AdMob 리워드 광고
     private RewardedAd rewardedAd;
     private string adUnitId = "ca-app-pub-3940256099942544/5224354917"; // 테스트 리워드 광고 ID
     private AdBuffType pendingBuffType;
 
-    // 싱글톤 및 DontDestroyOnLoad 처리
     void Awake()
     {
-        // 루트가 아니면 강제 루트로 이동 (자식이면 에러남)
         if (transform.parent != null)
             transform.SetParent(null);
 
@@ -44,13 +48,9 @@ public class AdBuffManager : MonoBehaviour
 
     void Start()
     {
-        // 광고 초기화
         MobileAds.Initialize(initStatus => { Debug.Log("AdMob SDK 초기화 완료"); });
-
-        // 리워드 광고 로드
         LoadRewardedAd();
 
-        // 버튼 이벤트 연결
         if (buffButtons != null)
         {
             for (int i = 0; i < buffButtons.Length; i++)
@@ -70,12 +70,12 @@ public class AdBuffManager : MonoBehaviour
             if (attackBuffTimer <= 0)
             {
                 AttackBuffActive = false;
+                attackBuffTimer = 0;
                 Debug.Log("공격력 버프 만료");
                 if (playerStats != null)
                     playerStats.RefreshStats();
             }
         }
-
         // 배속 버프
         if (SpeedBuffActive)
         {
@@ -83,11 +83,11 @@ public class AdBuffManager : MonoBehaviour
             if (speedBuffTimer <= 0)
             {
                 SpeedBuffActive = false;
+                speedBuffTimer = 0;
                 Debug.Log("배속 버프 만료");
             }
         }
         Time.timeScale = SpeedBuffActive ? 2.0f : 1.0f;
-
         // 골드 버프
         if (GoldBuffActive)
         {
@@ -95,9 +95,29 @@ public class AdBuffManager : MonoBehaviour
             if (goldBuffTimer <= 0)
             {
                 GoldBuffActive = false;
+                goldBuffTimer = 0;
                 Debug.Log("골드 버프 만료");
             }
         }
+
+        // ★ TMP 텍스트로 남은 시간 UI 실시간 업데이트
+        UpdateBuffTimeUI();
+    }
+
+    // 남은시간을 "mm:ss" 형식으로 표시
+    private void UpdateBuffTimeUI()
+    {
+        attackBuffTimeText.text = AttackBuffActive ? FormatTime(attackBuffTimer) : "";
+        speedBuffTimeText.text = SpeedBuffActive ? FormatTime(speedBuffTimer) : "";
+        goldBuffTimeText.text = GoldBuffActive ? FormatTime(goldBuffTimer) : "";
+    }
+
+    private string FormatTime(float time)
+    {
+        if (time < 0) time = 0;
+        int min = (int)(time / 60);
+        int sec = (int)(time % 60);
+        return $"{min:00}:{sec:00}";
     }
 
     // 광고 로드
@@ -117,7 +137,6 @@ public class AdBuffManager : MonoBehaviour
         });
     }
 
-    // 버튼에서 호출 (OnClick: 0=공격력, 1=배속, 2=골드)
     public void ShowRewardedAdByIndex(int idx)
     {
         AdBuffType type = AdBuffType.Attack;
@@ -130,7 +149,6 @@ public class AdBuffManager : MonoBehaviour
         ShowRewardedAd(type);
     }
 
-    // 광고 시청 및 보상 처리
     public void ShowRewardedAd(AdBuffType buffType)
     {
         if (rewardedAd != null)
@@ -148,14 +166,12 @@ public class AdBuffManager : MonoBehaviour
         }
     }
 
-    // 광고 닫힘 시 재로드
     private void HandleAdClosed()
     {
         Debug.Log("광고 닫힘, 새로 광고 로드");
         LoadRewardedAd();
     }
 
-    // 버프 부여 (실제 효과 부여/타이머 세팅)
     public void ActivateBuff(AdBuffType type)
     {
         switch (type)
@@ -178,7 +194,6 @@ public class AdBuffManager : MonoBehaviour
                 Debug.Log("골드 버프 적용 (5분)");
                 break;
         }
-        // (UI/이펙트 등 필요하면 추가)
     }
 
     public float GetBuffRemainTime(AdBuffType type)

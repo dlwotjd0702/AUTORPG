@@ -18,6 +18,16 @@ public class RewardManager : MonoBehaviour
         if (upgradeManager)
             upgradeManager.AddGold(monster.goldReward);
 
+        Vector3 textPos = monster.transform.position + Vector3.up * 0f;
+
+        // 골드
+        if (monster.goldReward > 0)
+            FloatingText3DPool.Instance.Spawn(textPos, $"+{monster.goldReward}G", new Color(1f, 0.85f, 0.2f)); // 노랑
+        textPos = monster.transform.position + Vector3.up * -0.5f;
+        // 경험치
+        if (monster.expReward > 0)
+            FloatingText3DPool.Instance.Spawn(textPos + Vector3.right * 0.6f, $"+{monster.expReward} Exp", Color.cyan);
+
         // --- 아이템 드랍 판정 ---
         if (gachaSystem != null && upgradeManager != null && inventorySystem != null)
         {

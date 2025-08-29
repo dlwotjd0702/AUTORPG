@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Purchasing; // IAP 네임스페이스!
 using Unity.Services.Core;    // UGS 네임스페이스
@@ -6,18 +7,19 @@ using System.Threading.Tasks; // Task
 public class GemShopIAP : MonoBehaviour, IStoreListener
 {
     public PlayerGemManager gemManager;
-    private static IStoreController storeController;
-    private static IExtensionProvider storeExtensionProvider;
+    private static IStoreController s_storeController;
+    private static IExtensionProvider s_storeExtensionProvider;
 
     public const string PRODUCT_100_GEM = "test_gem_100";
 
     // Start를 async로 변경
+    [Obsolete("Obsolete")]
     async void Start()
     {
         await UnityServices.InitializeAsync(); // UGS 먼저 초기화
         Debug.Log("Unity Gaming Services Initialized!");
 
-        if (storeController == null)
+        if (s_storeController == null)
         {
             var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
             builder.AddProduct(PRODUCT_100_GEM, ProductType.Consumable);
@@ -28,16 +30,16 @@ public class GemShopIAP : MonoBehaviour, IStoreListener
     // 상품 구매 버튼에서 호출
     public void BuyGems100()
     {
-        if (storeController != null)
-            storeController.InitiatePurchase(PRODUCT_100_GEM);
+        if (s_storeController != null)
+            s_storeController.InitiatePurchase(PRODUCT_100_GEM);
         else
             Debug.LogWarning("IAP 초기화 안됨");
     }
 
     public void OnInitialized(IStoreController controller, IExtensionProvider extensions)
     {
-        storeController = controller;
-        storeExtensionProvider = extensions;
+        s_storeController = controller;
+        s_storeExtensionProvider = extensions;
         Debug.Log("IAP 초기화 완료");
     }
 
