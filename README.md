@@ -6,8 +6,9 @@ Unity 기반의 Idle RPG 게임 프로젝트입니다.
 
 - [프로젝트 개요](#프로젝트-개요)
 - [기술 스택](#기술-스택)
+- [핵심 아키텍처](#핵심-아키텍처)
 - [프로젝트 구조](#프로젝트-구조)
-- [주요 시스템](#주요-시스템)
+- [주요 시스템 상세](#주요-시스템-상세)
 - [설치 및 실행](#설치-및-실행)
 - [데이터 구조](#데이터-구조)
 - [주요 기능](#주요-기능)
@@ -43,7 +44,132 @@ AUTO RPG는 Unity 엔진으로 개발된 자동 전투 기반 RPG 게임입니�
 - **Firebase Firestore**: 클라우드 데이터베이스
 - **Google AdMob**: 광고 서비스
 
-## �� 프로젝트 구조
+## 🏗 핵심 아키텍처
+
+### 1. State Machine Behaviour 기반 전투 시스템
+
+플레이어와 몬스터는 Unity SMB를 활용한 상태 머신으로 동작합니다.
+
+```8:27:Assets/Scripts/SMB/1. SMBControlHost/Player.cs
+    public class Player : MonoBehaviour, IDamageable, IAttackStat
+    {
+        public float moveSpeed = 5f;
+        public float attackRange = 2f;
+        public PlayerStats playerStats;
+        public float FinalAttack => playerStats.FinalAttack;
+        public float FinalAtkSpeed => playerStats.FinalAtkSpeed;
+        // ... 기타 스탯 프로퍼티
+```
+
+**상태 전이**: `SceneLinkedSMB`를 통해 Idle → Move → Attack → Death 상태를 자동 전이합니다.
+
+### 2. 스킬 시스템 (Factory Pattern)
+
+추상 클래스 기반 스킬 구조와 Factory 패턴으로 스킬을 생성합니다.
+
+```5:21:Assets/Scripts/Skills/SkillBase.cs
+public abstract class SkillBase
+{
+    public EquipmentData Data { get; private set; }
+    protected float cooldownTimer;
+    
+    public bool IsReady() => cooldownTimer <= 0f;
+    public void TryUseSkill()
+    {
+        if (IsReady())
+        {
+            UseSkill();
+            cooldownTimer = Data.Cooldown;
+        }
+    }
+    protected abstract void UseSkill();
+}
+```
+
+**자동 스킬 사용**: `SkillManager`가 쿨타임을 관리하고 준비된 스킬을 자동으로 발동합니다.
+
+```56:70:Assets/Scripts/Skills/SkillManager.cs
+            for (int i = 0; i < inventory.equippedSkillIds.Length; i++)
+            {
+                string skillId = inventory.equippedSkillIds[i];
+                if (string.IsNullOrEmpty(skillId)) continue;
+                if (!skillDict.TryGetValue(skillId, out var skill)) continue;
+                if (!skill.IsReady()) continue;
+
+                skill.TryUseSkill();
+                isSkillCasting = true;
+                castingTimer = 0.5f;
+                skillGlobalDelay = 0.5f;
+                break; // 한 번에 하나만 발동
+            }
+```
+
+### 3. 스탯 계산 시스템 (보유/장착 이중 효과)
+
+장비의 보유 효과와 장착 효과를 분리하여 계산합니다.
+
+```88:97:Assets/Scripts/Stats/PlayerStats.cs
+        public void RefreshStats()
+        {
+            var (atkMul, atkSpdMul) = inventory.GetWeaponMultipliers();
+            FinalAttack = Mathf.FloorToInt(baseAttack * atkMul * (1f + TempAttackBuff));
+            FinalAtkSpeed = baseAtkSpeed * atkSpdMul * (1f + TempAtkSpeedBuff);
+            
+            var (defMul, hpMul) = inventory.GetArmorMultipliers();
+            FinalDefense = Mathf.FloorToInt(baseDefense * defMul);
+            FinalHp = Mathf.FloorToInt(baseHp * hpMul);
+            // ... 패시브 스킬 적용
+        }
+```
+
+**계산 흐름**: 기본 스탯 → 장비 보유 효과 → 장비 장착 효과 → 버프 → 패시브 스킬
+
+### 4. 저장/로드 시스템 (Observer Pattern)
+
+`ISaveable` 인터페이스를 구현한 모든 컴포넌트가 자동으로 저장/로드에 참여합니다.
+
+```37:45:Assets/Scripts/Save/SaveManager.cs
+    public void SaveGame()
+    {
+        SaveData data = new SaveData();
+        foreach (var s in FindObjectsOfType<MonoBehaviour>().OfType<ISaveable>())
+            s.CollectSaveData(data);
+        
+        FirebaseManager.Instance.SaveGame(data, (success) => {
+            // 랭킹도 같이 갱신
+        });
+    }
+```
+
+### 5. 스테이지 난이도 스케일링
+
+스테이지와 웨이브에 따라 몬스터 스탯이 선형 증가합니다.
+
+```69:77:Assets/Scripts/Gameloop/StageManager.cs
+        float hpMultiplier = 1f + (currentStage - 1) * 0.5f + (currentWave - 1) * 0.2f;
+        float goldMultiplier = 1f + (currentStage - 1) * 0.3f + (currentWave - 1) * 0.1f;
+        float expMultiplier = 1f + (currentStage - 1) * 0.15f + (currentWave - 1) * 0.05f;
+        float attackMultiplier = 1f + (currentStage - 1) * 0.2f + (currentWave - 1) * 0.1f;
+
+        float maxHp = baseMaxHp * hpMultiplier;
+        int goldReward = Mathf.RoundToInt(baseGold * goldMultiplier);
+        int expReward = Mathf.RoundToInt(baseExp * expMultiplier);
+        float atk = baseAttack * attackMultiplier;
+```
+
+### 6. 가챠 확률 계산
+
+가챠 레벨에 따라 고등급 확률이 동적으로 계산됩니다.
+
+```99:101:Assets/Scripts/Inventory/GachaSystem.cs
+                float rate = baseRate / Mathf.Pow(2, grade - 1);
+                if (grade > 1)
+                    rate += (grade - 1) * level * 0.001f;
+```
+
+**알고리즘**: 기본 확률은 등급에 따라 지수적으로 감소하고, 가챠 레벨에 따라 선형 증가합니다.
+
+## 📁 프로젝트 구조
 
 ```
 AUTORPG/
@@ -68,7 +194,7 @@ AUTORPG/
 └── Packages/               # Unity 패키지 매니페스트
 ```
 
-## 🎯 주요 시스템
+## 🎯 주요 시스템 상세
 
 ### 1. 전투 시스템 (Combat)
 
@@ -338,9 +464,17 @@ Firebase Firestore에 저장되는 데이터 구조:
 - 딕셔너리 기반 데이터 조회
 - 이벤트 기반 UI 업데이트
 
-
 ## 👥 기여자
 
 개인프로젝트
+```
+
+변경 사항:
+1. 코드 예시 축소: 핵심 로직만 간단히 표시
+2. 설명 간소화: 불필요한 설명 제거
+3. 코드 블록 축소: 핵심 부분만 인용
+4. 구조 유지: 핵심 아키텍처는 상단에 유지
+
+핵심만 간결하게 정리했습니다.
 
 
